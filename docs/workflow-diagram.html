@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CivAgent Workflow Diagram</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050706;
+        --panel: rgba(245, 241, 232, 0.065);
+        --panel-strong: rgba(245, 241, 232, 0.1);
+        --ink: #f7f3e8;
+        --muted: rgba(247, 243, 232, 0.68);
+        --teal: #72e0c4;
+        --amber: #ffb454;
+        --rose: #ff9f8a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 10%, rgba(114, 224, 196, 0.18), transparent 28%),
+          radial-gradient(circle at 86% 16%, rgba(255, 180, 84, 0.16), transparent 24%),
+          linear-gradient(135deg, #050706 0%, #0b1110 48%, #140f0b 100%);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+
+      header {
+        position: relative;
+        z-index: 4;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px clamp(18px, 3vw, 34px);
+        border-bottom: 1px solid rgba(245, 241, 232, 0.12);
+        background: rgba(5, 7, 6, 0.76);
+        backdrop-filter: blur(18px);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 2vw, 1.45rem);
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button,
+      a {
+        min-height: 38px;
+        border: 1px solid rgba(245, 241, 232, 0.14);
+        border-radius: 8px;
+        padding: 0 12px;
+        color: var(--ink);
+        background: rgba(245, 241, 232, 0.08);
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      button:hover,
+      a:hover {
+        border-color: rgba(114, 224, 196, 0.42);
+        background: rgba(114, 224, 196, 0.12);
+      }
+
+      .stage {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .grid {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(rgba(245, 241, 232, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(245, 241, 232, 0.04) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 78%);
+        pointer-events: none;
+      }
+
+      .viewport {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        cursor: grab;
+      }
+
+      .viewport.dragging {
+        cursor: grabbing;
+      }
+
+      .diagram {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(1600px, 92vw);
+        min-height: 720px;
+        padding: 28px;
+        border: 1px solid rgba(245, 241, 232, 0.12);
+        border-radius: 8px;
+        background: rgba(5, 7, 6, 0.72);
+        box-shadow: 0 24px 90px rgba(0, 0, 0, 0.42);
+        transform-origin: 0 0;
+        user-select: none;
+      }
+
+      .mermaid {
+        min-width: 1100px;
+      }
+
+      .fallback {
+        display: none;
+        max-width: 760px;
+        margin: 80px auto;
+        padding: 24px;
+        border: 1px solid rgba(255, 180, 84, 0.28);
+        border-radius: 8px;
+        background: rgba(255, 180, 84, 0.08);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+
+      .status {
+        position: absolute;
+        left: clamp(18px, 3vw, 34px);
+        bottom: 22px;
+        z-index: 3;
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .status span {
+        border: 1px solid rgba(245, 241, 232, 0.11);
+        border-radius: 8px;
+        padding: 8px 10px;
+        background: rgba(5, 7, 6, 0.62);
+      }
+
+      @media (max-width: 760px) {
+        header {
+          display: grid;
+        }
+
+        .actions {
+          width: 100%;
+        }
+
+        button,
+        a {
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>CivAgent Workflow Diagram</h1>
+        <p>Drag to move. Use controls to zoom the fully connected agent workflow.</p>
+      </div>
+      <nav class="actions" aria-label="Diagram controls">
+        <button type="button" id="zoomOut">Zoom out</button>
+        <button type="button" id="zoomIn">Zoom in</button>
+        <button type="button" id="reset">Reset</button>
+        <a href="../README.md">README</a>
+      </nav>
+    </header>
+
+    <main class="stage">
+      <div class="grid" aria-hidden="true"></div>
+      <section class="viewport" id="viewport" aria-label="Movable CivAgent workflow diagram">
+        <div class="diagram" id="diagram">
+          <pre class="mermaid" id="mermaidSource">
+flowchart LR
+  classDef ui fill:#10201d,stroke:#72e0c4,color:#f7f3e8,stroke-width:1px
+  classDef gate fill:#2a2112,stroke:#ffb454,color:#f7f3e8,stroke-width:1px
+  classDef tool fill:#111827,stroke:#9fd7ff,color:#f7f3e8,stroke-width:1px
+  classDef model fill:#201734,stroke:#c6b6ff,color:#f7f3e8,stroke-width:1px
+  classDef store fill:#142018,stroke:#ddeed3,color:#f7f3e8,stroke-width:1px
+  classDef output fill:#241515,stroke:#ff9f8a,color:#f7f3e8,stroke-width:1px
+
+  A["Company Workspace"]:::ui --> B["/api/agent/runs"]:::ui
+  B --> C{"Strict Readiness Gate"}:::gate
+  C --> D["Tavily Live Research"]:::tool
+  C --> E["Firecrawl Website Extraction"]:::tool
+  C --> F["Composio SaaS Tool Graph"]:::tool
+  C --> G["E2B Sandboxed Analysis"]:::tool
+  D --> H["Evidence Bundle"]:::store
+  E --> H
+  F --> H
+  G --> H
+  H --> I["Gemini Organization Intelligence"]:::model
+  I --> J["Operating Artifacts"]:::output
+  J --> K["Supabase Evidence Sync"]:::store
+  K --> L["SQLite Local Record"]:::store
+  L --> M["Workspace Report + Export"]:::output
+  C -. missing key or provider failure .-> N["agent_run.failed audit event"]:::output
+          </pre>
+          <div class="fallback" id="fallback">
+            Mermaid could not load from the CDN. The workflow source is still available in this file and in the README.
+          </div>
+        </div>
+      </section>
+      <div class="status">
+        <span id="zoomLabel">100%</span>
+        <span>Gemini</span>
+        <span>Tavily</span>
+        <span>Firecrawl</span>
+        <span>Composio</span>
+        <span>E2B</span>
+        <span>Supabase</span>
+      </div>
+    </main>
+
+    <script type="module">
+      const diagram = document.getElementById("diagram");
+      const viewport = document.getElementById("viewport");
+      const zoomLabel = document.getElementById("zoomLabel");
+      const fallback = document.getElementById("fallback");
+      let scale = window.innerWidth < 760 ? 0.74 : 0.86;
+      let x = window.innerWidth < 760 ? -220 : -560;
+      let y = -330;
+      let dragging = false;
+      let dragStart = { x: 0, y: 0 };
+      let origin = { x: 0, y: 0 };
+
+      function renderTransform() {
+        diagram.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+      }
+
+      function zoom(delta) {
+        scale = Math.max(0.35, Math.min(1.8, scale + delta));
+        renderTransform();
+      }
+
+      function resetView() {
+        scale = window.innerWidth < 760 ? 0.74 : 0.86;
+        x = window.innerWidth < 760 ? -220 : -560;
+        y = -330;
+        renderTransform();
+      }
+
+      document.getElementById("zoomIn").addEventListener("click", () => zoom(0.12));
+      document.getElementById("zoomOut").addEventListener("click", () => zoom(-0.12));
+      document.getElementById("reset").addEventListener("click", () => {
+        resetView();
+      });
+
+      viewport.addEventListener("pointerdown", event => {
+        dragging = true;
+        viewport.classList.add("dragging");
+        dragStart = { x: event.clientX, y: event.clientY };
+        origin = { x, y };
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener("pointermove", event => {
+        if (!dragging) return;
+        x = origin.x + event.clientX - dragStart.x;
+        y = origin.y + event.clientY - dragStart.y;
+        renderTransform();
+      });
+
+      viewport.addEventListener("pointerup", event => {
+        dragging = false;
+        viewport.classList.remove("dragging");
+        viewport.releasePointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener(
+        "wheel",
+        event => {
+          event.preventDefault();
+          zoom(event.deltaY < 0 ? 0.08 : -0.08);
+        },
+        { passive: false }
+      );
+
+      resetView();
+
+      try {
+        const mermaid = await import("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs");
+        mermaid.default.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: "dark",
+          flowchart: {
+            curve: "basis",
+            nodeSpacing: 58,
+            rankSpacing: 82
+          },
+          themeVariables: {
+            background: "#050706",
+            primaryColor: "#10201d",
+            primaryTextColor: "#f7f3e8",
+            primaryBorderColor: "#72e0c4",
+            lineColor: "rgba(247, 243, 232, 0.46)",
+            secondaryColor: "#111827",
+            tertiaryColor: "#241515"
+          }
+        });
+        await mermaid.default.run({ querySelector: ".mermaid" });
+      } catch (error) {
+        document.getElementById("mermaidSource").style.display = "none";
+        fallback.style.display = "block";
+      }
+    </script>
+  </body>
+</html>

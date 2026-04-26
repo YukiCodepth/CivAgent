@@ -1,0 +1,9 @@
+data/
+.env
+.env.local
+__pycache__/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store
+node_modules/
