@@ -1,0 +1,94 @@
+name: Release CivAgent Desktop
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            files: |
+              release/*.dmg
+              release/*-mac.zip
+              release/*.blockmap
+              release/latest-mac.yml
+          - name: Windows
+            os: windows-latest
+            files: |
+              release/*.exe
+              release/*.blockmap
+              release/latest.yml
+          - name: Linux
+            os: ubuntu-22.04
+            files: |
+              release/*.AppImage
+              release/*.blockmap
+              release/latest-linux.yml
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libnss3 libxss1 libgtk-3-0 libgbm1 libasound2 libfuse2
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        run: npm run setup:python
+
+      - name: Generate brand icons
+        run: npm run brand:icons
+
+      - name: Check
+        run: npm run check
+
+      - name: Build desktop package
+        run: npm run desktop:dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CivAgent Desktop ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: ${{ matrix.files }}
+          body: |
+            # CivAgent Desktop
+
+            Installable organization intelligence software for companies designing governed AI-agent operating models.
+
+            ## Assets
+            - macOS: DMG and ZIP
+            - Windows: NSIS installer
+            - Linux: AppImage
+
+            ## Runtime
+            CivAgent Desktop starts a local Python backend, opens the `/app` workspace, requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B, then syncs completed run evidence to Supabase.

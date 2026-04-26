@@ -20,6 +20,9 @@ const agentTimeline = document.getElementById("agentTimeline");
 const sourceList = document.getElementById("sourceList");
 const toolList = document.getElementById("toolList");
 const approvalList = document.getElementById("approvalList");
+const configForm = document.getElementById("configForm");
+const configNotice = document.getElementById("configNotice");
+const saveConfigButton = document.getElementById("saveConfigButton");
 
 const storageKey = "civagent.workspace.v1";
 const defaultProfile = {
@@ -45,6 +48,7 @@ let savedRuns = [];
 let auditEvents = [];
 let serverMode = false;
 let integrationState = null;
+let configState = null;
 let agentAvailable = false;
 
 function clamp(value, min, max) {
@@ -436,6 +440,33 @@ function renderIntegrations() {
   });
 }
 
+function renderConfigStatus(config) {
+  configState = config || configState;
+  if (!configForm || !configState?.values) return;
+
+  Object.entries(configState.values).forEach(([key, item]) => {
+    const field = configForm.elements[key];
+    if (!field) return;
+    if (key === "AI_PROVIDER") {
+      field.value = "gemini";
+      return;
+    }
+    if (key === "GEMINI_MODEL" && item.configured && !field.value) {
+      field.value = item.masked || "gemini-3-flash-preview";
+      return;
+    }
+    if (item.configured) {
+      field.placeholder = `Saved: ${item.masked || "configured"}`;
+    }
+  });
+
+  const configuredCount = Object.values(configState.values).filter(item => item.configured).length;
+  const totalCount = Object.keys(configState.values).length;
+  if (configNotice) {
+    configNotice.textContent = `${configuredCount}/${totalCount} desktop settings configured. Stored in local app data.`;
+  }
+}
+
 function renderAgentNotice(message) {
   if (!agentNotice) return;
   if (message) {
@@ -622,6 +653,47 @@ async function runSimulation(event) {
   renderAgentNotice("Server is required. Start the CivAgent API and connect every integration before running the agent.");
 }
 
+async function saveDesktopConfig(event) {
+  event.preventDefault();
+  if (!configForm) return;
+  const formData = new FormData(configForm);
+  const config = {};
+  for (const [key, rawValue] of formData.entries()) {
+    const value = rawValue.toString().trim();
+    if (key === "AI_PROVIDER") {
+      config[key] = "gemini";
+    } else if (value) {
+      config[key] = value;
+    }
+  }
+  saveConfigButton.disabled = true;
+  saveConfigButton.textContent = "Saving...";
+  try {
+    const data = await apiRequest("/api/config", {
+      method: "POST",
+      body: JSON.stringify({ config })
+    });
+    configState = data.config || configState;
+    integrationState = data.integrations || integrationState;
+    auditEvents = data.audit || auditEvents;
+    agentAvailable = Boolean(integrationState?.agentAvailable);
+    [...configForm.elements].forEach(field => {
+      if (field.type === "password") field.value = "";
+    });
+    renderConfigStatus(configState);
+    setWorkspaceMode(agentAvailable ? "agent" : "server");
+    renderIntegrations();
+    renderAgentNotice("Desktop integrations saved. CivAgent refreshed the required readiness gate.");
+    renderAudit();
+  } catch (error) {
+    renderAgentNotice(error.message || "Could not save desktop integrations.");
+    console.warn(error);
+  } finally {
+    saveConfigButton.disabled = false;
+    saveConfigButton.textContent = "Save desktop integrations";
+  }
+}
+
 function exportActiveRun() {
   if (!activeRun) return;
   if (serverMode && activeRun.id) {
@@ -769,6 +841,7 @@ async function boot() {
     serverMode = data.mode === "server";
     auditEvents = data.audit || [];
     integrationState = data.integrations || null;
+    configState = data.config || null;
     agentAvailable = Boolean(integrationState?.agentAvailable);
     savedRuns = Array.isArray(data.agentRuns) ? data.agentRuns : [];
     const profile = { ...defaultProfile, ...(data.profile || {}) };
@@ -776,6 +849,7 @@ async function boot() {
     activeRun = savedRuns[0] || { ...calculateRun(profile), mode: "configuration-preview", sources: [], toolCalls: [], approvals: [] };
     setWorkspaceMode(agentAvailable ? "agent" : "server");
     writeStore(profile, savedRuns);
+    renderConfigStatus(configState);
     renderAll(activeRun);
     return;
   } catch (error) {
@@ -801,6 +875,7 @@ form.addEventListener("input", syncRangeOutputs);
 exportRunButton.addEventListener("click", exportActiveRun);
 clearRunsButton.addEventListener("click", clearRuns);
 resetWorkspaceButton.addEventListener("click", resetWorkspace);
+if (configForm) configForm.addEventListener("submit", saveDesktopConfig);
 
 resize();
 boot();

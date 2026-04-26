@@ -140,14 +140,11 @@ button {
 }
 
 .brand-mark {
-  width: 18px;
-  height: 18px;
-  border: 1px solid rgba(82, 224, 196, 0.9);
-  border-radius: 50%;
-  background:
-    linear-gradient(90deg, transparent 46%, rgba(82, 224, 196, 0.9) 48% 52%, transparent 54%),
-    linear-gradient(0deg, transparent 46%, rgba(255, 180, 84, 0.9) 48% 52%, transparent 54%);
-  box-shadow: 0 0 24px rgba(82, 224, 196, 0.46);
+  width: 31px;
+  height: 31px;
+  display: block;
+  border-radius: 9px;
+  filter: drop-shadow(0 0 16px rgba(82, 224, 196, 0.38));
 }
 
 .topbar nav {
@@ -1195,6 +1192,197 @@ button:disabled {
   line-height: 0.92;
 }
 
+.product-site .hero {
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.8fr);
+}
+
+.product-site h1 {
+  max-width: 760px;
+}
+
+.desktop-preview,
+.desktop-config-panel,
+.download-panel {
+  border: 1px solid rgba(245, 241, 232, 0.14);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(10, 18, 16, 0.9), rgba(7, 10, 9, 0.78));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
+}
+
+.desktop-preview {
+  overflow: hidden;
+}
+
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(245, 241, 232, 0.1);
+  background: rgba(245, 241, 232, 0.05);
+}
+
+.window-bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(245, 241, 232, 0.28);
+}
+
+.window-bar span:first-child {
+  background: var(--rust);
+}
+
+.window-bar span:nth-child(2) {
+  background: var(--amber);
+}
+
+.window-bar span:nth-child(3) {
+  background: var(--teal);
+}
+
+.window-bar strong {
+  margin-left: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.desktop-preview-body {
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.preview-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(245, 241, 232, 0.12);
+}
+
+.preview-status span,
+.preview-report small,
+.download-panel span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.preview-status strong {
+  color: var(--teal);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.preview-grid span {
+  min-height: 46px;
+  padding: 13px;
+  border: 1px solid rgba(245, 241, 232, 0.1);
+  border-radius: 8px;
+  background: rgba(245, 241, 232, 0.05);
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+
+.preview-report {
+  padding: 18px;
+  border-radius: 8px;
+  background: rgba(82, 224, 196, 0.08);
+}
+
+.preview-report strong {
+  display: block;
+  margin: 6px 0 8px;
+}
+
+.preview-report p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.desktop-config-panel {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.desktop-config-panel .saved-head {
+  align-items: start;
+}
+
+.config-form {
+  display: grid;
+  gap: 16px;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.download-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+}
+
+.download-panel div {
+  display: grid;
+  gap: 10px;
+  padding: clamp(20px, 3vw, 30px);
+  border-right: 1px solid rgba(245, 241, 232, 0.1);
+}
+
+.download-panel div:last-child {
+  border-right: 0;
+}
+
+.download-panel code {
+  white-space: normal;
+  color: var(--teal);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.desktop-app .hero,
+.desktop-app .ticker,
+.desktop-app #platform,
+.desktop-app #use-cases,
+.desktop-app #operating-model,
+.desktop-app .protocol,
+.desktop-app .roadmap,
+.desktop-app .final-cta {
+  display: none;
+}
+
+.desktop-app main {
+  padding-top: 86px;
+}
+
+.desktop-app .workspace {
+  min-height: calc(100svh - 86px);
+  padding-top: 38px;
+}
+
+.desktop-app .workspace-shell {
+  background: linear-gradient(145deg, rgba(10, 17, 16, 0.94), rgba(5, 8, 7, 0.88));
+}
+
+.desktop-app .reveal {
+  opacity: 1;
+  transform: none;
+}
+
 footer {
   width: min(1180px, calc(100% - 36px));
   margin: 0 auto;
@@ -1259,13 +1447,15 @@ footer {
   }
 
   .hero,
+  .product-site .hero,
   .workspace-grid,
   .agent-panels,
   .split,
   .engine-board,
   .protocol-panel,
   .api-panel,
-  .security-layout {
+  .security-layout,
+  .download-panel {
     grid-template-columns: 1fr;
   }
 
@@ -1278,8 +1468,18 @@ footer {
   .architecture-grid,
   .artifact-grid,
   .proof-strip,
-  .roadmap-grid {
+  .roadmap-grid,
+  .config-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .download-panel div {
+    border-right: 0;
+    border-bottom: 1px solid rgba(245, 241, 232, 0.1);
+  }
+
+  .download-panel div:last-child {
+    border-bottom: 0;
   }
 }
 
@@ -1323,6 +1523,7 @@ footer {
     .audit-list,
     .integration-grid,
     .proof-strip,
+    .config-grid,
   .endpoint-grid,
   .roadmap-grid {
     grid-template-columns: 1fr;

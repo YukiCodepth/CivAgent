@@ -2,11 +2,81 @@
   "name": "civagent",
   "version": "1.0.0",
   "private": true,
-  "description": "Connected Organization Intelligence Agent for designing AI-native operating models.",
+  "author": "CivAgent",
+  "description": "CivAgent Desktop is connected organization intelligence software for designing governed AI-agent operating models.",
+  "main": "desktop/main.js",
   "scripts": {
     "start": "python3 server.py",
-    "setup:python": "python3 -m pip install -r requirements.txt",
+    "setup:python": "node scripts/run-python.js -m pip install -r requirements.txt",
+    "brand:icons": "node scripts/run-python.js scripts/generate_brand_assets.py",
     "static": "python3 -m http.server 8080",
-    "check": "node --check script.js && python3 -m py_compile server.py"
+    "desktop:dev": "electron .",
+    "backend:build": "node scripts/run-python.js -m PyInstaller --clean --onefile --name civagent-backend --distpath dist-backend --workpath build-backend --specpath build-backend server.py",
+    "desktop:dist": "npm run backend:build && electron-builder",
+    "check": "node --check script.js && node --check desktop/main.js && node --check scripts/run-python.js && node scripts/run-python.js -m py_compile server.py scripts/generate_brand_assets.py"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "ai.civagent.desktop",
+    "productName": "CivAgent Desktop",
+    "files": [
+      "app.html",
+      "index.html",
+      "styles.css",
+      "script.js",
+      "server.py",
+      "assets/**",
+      "docs/**",
+      "desktop/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist-backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".",
+        "to": "web",
+        "filter": [
+          "index.html",
+          "app.html",
+          "styles.css",
+          "script.js",
+          "assets/**",
+          "docs/**"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.business"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    }
   }
 }

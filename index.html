@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="CivAgent is a connected AI agent platform for researching companies, designing agent operating models, and exporting deployment evidence."
+      content="CivAgent Desktop is installable organization intelligence software for designing, governing, and exporting real AI-agent operating models."
     />
-    <title>CivAgent - Real Organization Intelligence Agent</title>
+    <title>CivAgent Desktop - AI Agent Operating Software</title>
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,628 +18,235 @@
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="product-site">
     <div class="background-film" aria-hidden="true">
       <img src="assets/civagent-hero.png" alt="" />
       <div class="grain"></div>
       <div class="scanline"></div>
-      <canvas id="field"></canvas>
     </div>
 
     <header class="topbar">
       <a class="brand" href="#top" aria-label="CivAgent home">
-        <span class="brand-mark"></span>
+        <img class="brand-mark" src="assets/brand/civagent-mark.svg" alt="" />
         <span>CivAgent</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#platform">Platform</a>
-        <a href="#workspace">Workspace</a>
-        <a href="#artifacts">Artifacts</a>
-        <a href="#use-cases">Use cases</a>
-        <a href="#architecture">Architecture</a>
+        <a href="#software">Software</a>
+        <a href="#stack">Stack</a>
+        <a href="#security">Security</a>
+        <a href="#download">Download</a>
       </nav>
-      <a class="nav-action" href="#workspace">Start using</a>
+      <a class="nav-action" href="/app">Open app</a>
     </header>
 
     <main id="top">
-      <section class="hero section">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">Connected organization intelligence agent</p>
-          <h1>Build the company your agents can actually operate.</h1>
+      <section class="hero section product-hero">
+        <div class="hero-copy reveal visible">
+          <p class="eyebrow">Desktop software for agentic companies</p>
+          <h1>CivAgent Desktop</h1>
           <p class="hero-text">
-            CivAgent researches a company, calls external AI tools, designs deployable
-            agent teams, writes approval policies, stores evidence, and turns the whole
-            operating model into board-ready artifacts.
+            Installable organization intelligence software that researches a company,
+            calls real AI tools, designs governed agent teams, syncs evidence to
+            Supabase, and exports board-ready operating artifacts.
           </p>
           <div class="hero-actions">
-            <a class="primary-action" href="#workspace">Open company workspace</a>
-            <a class="secondary-action" href="#artifacts">Review sample artifacts</a>
+            <a class="primary-action" href="/app">Launch local app</a>
+            <a class="secondary-action" href="#download">Build desktop package</a>
           </div>
         </div>
 
-        <aside class="hero-console reveal" data-delay="140" aria-label="Live workspace status">
-          <div class="console-head">
-            <span id="heroOrg">Northstar Labs</span>
-            <span class="live-dot">workspace active</span>
+        <aside class="desktop-preview reveal visible" aria-label="CivAgent Desktop preview">
+          <div class="window-bar">
+            <span></span>
+            <span></span>
+            <span></span>
+            <strong>CivAgent Desktop</strong>
           </div>
-          <div class="console-grid">
-            <div>
-              <small>Deploy readiness</small>
-              <strong id="heroReadiness">84%</strong>
+          <div class="desktop-preview-body">
+            <div class="preview-status">
+              <span>Required stack</span>
+              <strong>6 required systems</strong>
             </div>
-            <div>
-              <small>Human leverage</small>
-              <strong id="heroLeverage">1 : 18</strong>
+            <div class="preview-grid">
+              <span>Gemini reasoning</span>
+              <span>Tavily research</span>
+              <span>Firecrawl crawl</span>
+              <span>Composio tool graph</span>
+              <span>E2B sandbox</span>
+              <span>Supabase sync</span>
             </div>
-            <div>
-              <small>Agent roles</small>
-              <strong id="heroAgents">4</strong>
+            <div class="preview-report">
+              <small>Active run</small>
+              <strong>Operating model generated</strong>
+              <p>Sources, tool calls, approval gates, artifacts, and audit evidence are saved as one company record.</p>
             </div>
-            <div>
-              <small>Risk posture</small>
-              <strong id="heroRisk">Medium</strong>
-            </div>
-          </div>
-          <div class="signal-map" aria-hidden="true">
-            <span style="--x: 12%; --y: 38%; --d: 0s"></span>
-            <span style="--x: 29%; --y: 68%; --d: .7s"></span>
-            <span style="--x: 47%; --y: 24%; --d: 1.2s"></span>
-            <span style="--x: 71%; --y: 55%; --d: .35s"></span>
-            <span style="--x: 86%; --y: 29%; --d: 1.5s"></span>
           </div>
         </aside>
       </section>
 
-      <section class="ticker" aria-label="Workspace capabilities">
+      <section class="ticker" aria-label="Desktop software capabilities">
         <div>
-          <span>Gemini agent orchestration</span>
-          <span>Tavily live research</span>
-          <span>Firecrawl website extraction</span>
-          <span>Composio SaaS tool layer</span>
-          <span>E2B sandbox lane</span>
-          <span>Supabase evidence sync</span>
-          <span>Gemini agent orchestration</span>
-          <span>Tavily live research</span>
-          <span>Firecrawl website extraction</span>
-          <span>Composio SaaS tool layer</span>
-          <span>E2B sandbox lane</span>
-          <span>Supabase evidence sync</span>
+          <span>Installable desktop app</span>
+          <span>Local backend sidecar</span>
+          <span>Masked integration settings</span>
+          <span>Strict real-agent readiness</span>
+          <span>Cloud evidence sync</span>
+          <span>Exportable reports</span>
+          <span>Installable desktop app</span>
+          <span>Local backend sidecar</span>
+          <span>Masked integration settings</span>
+          <span>Strict real-agent readiness</span>
+          <span>Cloud evidence sync</span>
+          <span>Exportable reports</span>
         </div>
       </section>
 
-      <section id="platform" class="section company-section">
-        <div class="section-kicker reveal">Platform</div>
+      <section id="software" class="section company-section">
+        <div class="section-kicker reveal visible">Software</div>
         <div class="split">
-          <h2 class="reveal">The operating layer for agentic companies.</h2>
-          <p class="section-text reveal" data-delay="120">
-            CivAgent is not a chatbot, prompt wrapper, or one-off demo. It is a real
-            Organization Intelligence Agent that researches live sources, coordinates
-            specialist planning agents, records tool calls, and produces the operating
-            evidence a company needs before autonomous software touches real work.
+          <h2 class="reveal visible">A real app for the work before agents touch production.</h2>
+          <p class="section-text reveal visible">
+            CivAgent Desktop separates the company product site from the operating
+            workspace. The app launches a local API, manages required integrations,
+            runs the organization agent, and keeps sensitive keys out of the website.
           </p>
         </div>
 
         <div class="platform-grid">
-          <article class="platform-card reveal">
+          <article class="platform-card reveal visible">
             <span>01</span>
-            <h3>Research Agent</h3>
-            <p>
-              Uses Tavily and Firecrawl extraction to understand the company,
-              market, buyers, pressure, competitors, and operational surface area.
-            </p>
+            <h3>Desktop workspace</h3>
+            <p>Company intake, agent execution, sources, tool calls, artifacts, saved runs, and audit logs live in the app.</p>
           </article>
-          <article class="platform-card reveal" data-delay="80">
+          <article class="platform-card reveal visible">
             <span>02</span>
-            <h3>Workflow Architect</h3>
-            <p>
-              Designs deployable agent teams, tool permissions, memory boundaries,
-              handoffs, escalation paths, and phased rollout plans.
-            </p>
+            <h3>Local backend</h3>
+            <p>Electron starts a local Python sidecar on 127.0.0.1 and loads the workspace only after health checks pass.</p>
           </article>
-          <article class="platform-card reveal" data-delay="160">
+          <article class="platform-card reveal visible">
             <span>03</span>
-            <h3>Risk Governor</h3>
-            <p>
-              Creates approval maps, control checks, audit events, and evidence
-              requirements for humans to supervise high-impact actions.
-            </p>
+            <h3>Required integrations</h3>
+            <p>Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B must all be ready before the Run button unlocks.</p>
           </article>
-          <article class="platform-card reveal" data-delay="240">
+          <article class="platform-card reveal visible">
             <span>04</span>
-            <h3>Venture Strategist</h3>
-            <p>
-              Produces the business model, moat, pricing logic, launch wedge, and
-              investor-grade memo for a scalable agentic company.
-            </p>
+            <h3>Evidence package</h3>
+            <p>Every completed run includes provider status, sources, sandbox analysis, Supabase sync, and exportable reports.</p>
           </article>
         </div>
+      </section>
 
-        <div class="proof-strip reveal">
+      <section id="stack" class="section engine">
+        <div class="section-kicker reveal visible">Connected stack</div>
+        <div class="split">
+          <h2 class="reveal visible">Built around the tools companies already need to trust agents.</h2>
+          <p class="section-text reveal visible">
+            CivAgent is not a prompt shell. It composes model reasoning, live research,
+            website extraction, SaaS tool discovery, sandbox analysis, and cloud evidence storage.
+          </p>
+        </div>
+
+        <div class="proof-strip reveal visible">
           <div>
             <strong>Gemini</strong>
-            <span>real model reasoning</span>
+            <span>operating model reasoning</span>
           </div>
           <div>
             <strong>Tavily</strong>
-            <span>live web research</span>
+            <span>live market research</span>
           </div>
           <div>
-            <strong>Supabase</strong>
-            <span>cloud evidence store</span>
+            <strong>Firecrawl</strong>
+            <span>required website crawl</span>
           </div>
           <div>
             <strong>Composio</strong>
-            <span>SaaS action layer</span>
+            <span>SaaS action graph</span>
           </div>
           <div>
             <strong>E2B</strong>
-            <span>sandbox lane</span>
+            <span>sandbox scoring</span>
           </div>
-        </div>
-      </section>
-
-      <section id="workspace" class="section workspace">
-        <div class="workspace-shell reveal">
-          <div class="workspace-head">
-            <div>
-              <p class="eyebrow">Company workspace</p>
-              <h2>Start with your operating reality.</h2>
-              <p>
-                Company inputs, live research, agent traces, artifacts, audit records,
-                and saved runs stay synced through the CivAgent product API.
-              </p>
-            </div>
-            <div class="workspace-status" id="workspaceStatus">
-              <span></span>
-              Connecting to product API
-            </div>
-          </div>
-
-          <div class="workspace-grid">
-            <form class="ops-form" id="simForm">
-              <div class="field-pair">
-                <label for="orgName">Organization</label>
-                <input id="orgName" name="orgName" placeholder="Northstar Labs" autocomplete="organization" />
-              </div>
-
-              <div class="field-pair">
-                <label for="website">Website or product URL</label>
-                <input id="website" name="website" placeholder="https://example.com" inputmode="url" autocomplete="url" required />
-              </div>
-
-              <div class="form-row">
-                <div class="field-pair">
-                  <label for="market">Primary market</label>
-                  <select id="market" name="market" aria-label="Primary market">
-                    <option>Enterprise SaaS</option>
-                    <option>Healthcare operations</option>
-                    <option>Fintech infrastructure</option>
-                    <option>Legal services</option>
-                    <option>Industrial logistics</option>
-                    <option>Customer operations</option>
-                  </select>
-                </div>
-                <div class="field-pair">
-                  <label for="stage">Company stage</label>
-                  <select id="stage" name="stage" aria-label="Company stage">
-                    <option>Pre-seed</option>
-                    <option selected>Seed</option>
-                    <option>Series A</option>
-                    <option>Growth</option>
-                    <option>Enterprise transformation</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="field-pair">
-                <label for="thesis">Operating thesis</label>
-                <textarea
-                  id="thesis"
-                  name="thesis"
-                  rows="5"
-                  placeholder="Describe the business, customers, core workflows, and where agents should create leverage."
-                ></textarea>
-              </div>
-
-              <div class="slider-grid">
-                <div class="range-card">
-                  <label for="humans">Human operators</label>
-                  <output id="humanOutput">12</output>
-                  <input id="humans" name="humans" type="range" min="2" max="120" value="12" />
-                </div>
-                <div class="range-card">
-                  <label for="agentCount">Planned agents</label>
-                  <output id="agentOutput">32</output>
-                  <input id="agentCount" name="agentCount" type="range" min="4" max="250" value="32" />
-                </div>
-                <div class="range-card">
-                  <label for="riskTolerance">Risk tolerance</label>
-                  <output id="riskOutput">54</output>
-                  <input id="riskTolerance" name="riskTolerance" type="range" min="10" max="90" value="54" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="field-pair">
-                  <label for="autonomy">Autonomy policy</label>
-                  <select id="autonomy" name="autonomy" aria-label="Autonomy policy">
-                    <option>Human-reviewed</option>
-                    <option selected>Human-supervised</option>
-                    <option>Autonomous with limits</option>
-                  </select>
-                </div>
-                <div class="field-pair">
-                  <label for="horizon">Simulation horizon</label>
-                  <select id="horizon" name="horizon" aria-label="Simulation horizon">
-                    <option value="90">90 days</option>
-                    <option value="180">180 days</option>
-                    <option value="365" selected>12 months</option>
-                    <option value="730">24 months</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="button-row">
-                <button type="submit" id="runAgentButton">Run organization agent</button>
-                <button type="button" class="ghost-button" id="resetWorkspace">Reset profile</button>
-              </div>
-              <p class="agent-notice" id="agentNotice" role="status">
-                Checking real-agent integrations.
-              </p>
-            </form>
-
-            <section class="ops-board" aria-label="Simulation output">
-              <div class="score-strip" id="scoreStrip">
-                <div>
-                  <small>Readiness</small>
-                  <strong>84%</strong>
-                </div>
-                <div>
-                  <small>Human leverage</small>
-                  <strong>1 : 18</strong>
-                </div>
-                <div>
-                  <small>Risk level</small>
-                  <strong>Medium</strong>
-                </div>
-              </div>
-
-              <div class="brief" id="brief" aria-live="polite"></div>
-            </section>
-          </div>
-
-          <section class="agent-panels" aria-label="Real agent execution evidence">
-            <article class="agent-panel">
-              <div class="saved-head">
-                <h3>Integration status</h3>
-                <span id="agentMode">Awaiting keys</span>
-              </div>
-              <div class="integration-grid" id="integrationGrid"></div>
-            </article>
-
-            <article class="agent-panel">
-              <div class="saved-head">
-                <h3>Agent timeline</h3>
-                <span>Specialist orchestration</span>
-              </div>
-              <div class="agent-timeline" id="agentTimeline"></div>
-            </article>
-
-            <article class="agent-panel">
-              <div class="saved-head">
-                <h3>Sources</h3>
-                <span>Live research evidence</span>
-              </div>
-              <div class="source-list" id="sourceList"></div>
-            </article>
-
-            <article class="agent-panel">
-              <div class="saved-head">
-                <h3>Tool calls and approvals</h3>
-                <span>Action governance</span>
-              </div>
-              <div class="tool-list" id="toolList"></div>
-              <div class="approval-list" id="approvalList"></div>
-            </article>
-          </section>
-
-          <section class="saved-runs" aria-label="Saved organization agent runs">
-            <div class="saved-head">
-              <h3>Recent organization agent runs</h3>
-              <div>
-                <button type="button" id="exportRun">Export report</button>
-                <button type="button" id="clearRuns">Clear</button>
-              </div>
-            </div>
-            <div class="run-list" id="runList" aria-live="polite"></div>
-          </section>
-
-          <section class="audit-panel" aria-label="Audit log">
-            <div class="saved-head">
-              <h3>Audit log</h3>
-              <span id="auditMode">Awaiting activity</span>
-            </div>
-            <div class="audit-list" id="auditList" aria-live="polite"></div>
-          </section>
-        </div>
-      </section>
-
-      <section id="use-cases" class="section company-section">
-        <div class="section-kicker reveal">Use cases</div>
-        <div class="split">
-          <h2 class="reveal">Built for teams that are about to give agents real responsibility.</h2>
-          <p class="section-text reveal" data-delay="120">
-            CivAgent helps founders, AI transformation teams, operators, consultants,
-            and risk leaders align on the same question: what operating model should
-            exist before autonomous software starts acting inside the company?
-          </p>
-        </div>
-
-        <div class="use-case-grid">
-          <article class="use-case-card reveal">
-            <h3>AI-native startups</h3>
-            <p>Design the first agent-powered operating model before hiring, fundraising, or scaling customer delivery.</p>
-            <ul>
-              <li>Founder operating memo</li>
-              <li>Human-to-agent leverage model</li>
-              <li>First workflow deployment path</li>
-            </ul>
-          </article>
-          <article class="use-case-card reveal" data-delay="90">
-            <h3>Enterprise AI offices</h3>
-            <p>Evaluate where agentic automation can enter a department without creating hidden operational risk.</p>
-            <ul>
-              <li>Department readiness score</li>
-              <li>Approval and control map</li>
-              <li>Executive decision brief</li>
-            </ul>
-          </article>
-          <article class="use-case-card reveal" data-delay="180">
-            <h3>Regulated operations</h3>
-            <p>Model approval gates and evidence requirements before agents interact with sensitive workflows.</p>
-            <ul>
-              <li>Risk queue</li>
-              <li>Audit trail</li>
-              <li>Exportable evidence package</li>
-            </ul>
-          </article>
-          <article class="use-case-card reveal" data-delay="270">
-            <h3>AI consultancies</h3>
-            <p>Turn discovery calls into structured agent reports that clients can act on immediately.</p>
-            <ul>
-              <li>Client profile intake</li>
-              <li>Scenario report</li>
-              <li>Deployment roadmap</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section id="operating-model" class="section engine">
-        <div class="section-kicker reveal">Operating model</div>
-        <div class="split">
-          <h2 class="reveal">A connected model of people, agents, controls, and markets.</h2>
-          <p class="section-text reveal" data-delay="120">
-            CivAgent treats the company as a living system. Every run converts your
-            profile and live research into agent roles, human approval points, customer
-            pressure, capital constraints, and failure paths that can be reviewed by leadership.
-          </p>
-        </div>
-
-        <div class="engine-board reveal">
-          <div class="timeline" id="timeline">
-            <div class="time-node active">
-              <span>01</span>
-              <strong>Company genome</strong>
-              <p>Market, stage, workflows, team size, autonomy policy, and risk tolerance.</p>
-            </div>
-            <div class="time-node">
-              <span>02</span>
-              <strong>Agent society</strong>
-              <p>Role roster, responsibility boundaries, tools, memory, and escalation rules.</p>
-            </div>
-            <div class="time-node">
-              <span>03</span>
-              <strong>World pressure</strong>
-              <p>Customer expectations, competitor response, operational load, and trust events.</p>
-            </div>
-            <div class="time-node">
-              <span>04</span>
-              <strong>Deployment path</strong>
-              <p>Phased rollout plan, approval gates, readiness score, and executive memo.</p>
-            </div>
-          </div>
-          <div class="simulation-window" aria-hidden="true">
-            <div class="orbit orbit-one"></div>
-            <div class="orbit orbit-two"></div>
-            <div class="core"></div>
-            <div class="floating-label label-a" id="modelLabelA">Customer pressure</div>
-            <div class="floating-label label-b" id="modelLabelB">Agent labor graph</div>
-            <div class="floating-label label-c" id="modelLabelC">Approval memory</div>
-          </div>
-        </div>
-      </section>
-
-      <section id="artifacts" class="section artifacts">
-        <div class="section-kicker reveal">Synced artifacts</div>
-        <div class="split">
-          <h2 class="reveal">Every artifact updates from the active organization run.</h2>
-          <p class="section-text reveal" data-delay="120">
-            The real agent generates the artifacts a serious organization needs before
-            deployment: intelligence brief, agent org chart, workflow blueprint,
-            tool access plan, approval policy, risk register, moat memo, and executive brief.
-          </p>
-        </div>
-
-        <div class="artifact-grid" id="artifactGrid"></div>
-      </section>
-
-      <section id="architecture" class="section company-section">
-        <div class="section-kicker reveal">Architecture</div>
-        <div class="split">
-          <h2 class="reveal">A real product foundation, not just a front-end concept.</h2>
-          <p class="section-text reveal" data-delay="120">
-            The current CivAgent build includes the product website, browser workspace,
-            product API, real agent endpoint, external tool adapters, SQLite evidence store,
-            mandatory Supabase sync, audit log, export endpoint, Dockerfile, and deployment documentation.
-          </p>
-        </div>
-
-        <div class="architecture-grid">
-          <article class="architecture-card reveal">
-            <span>Frontend</span>
-            <h3>Website + workspace</h3>
-            <p>Responsive HTML, CSS, and JavaScript interface with integration status, trace panels, sources, approvals, and synced artifacts.</p>
-          </article>
-          <article class="architecture-card reveal" data-delay="80">
-            <span>Backend</span>
-            <h3>Python agent API</h3>
-            <p>Standard-library HTTP server with real agent runs, external API calls, static serving, validation, and security headers.</p>
-          </article>
-          <article class="architecture-card reveal" data-delay="160">
-            <span>Persistence</span>
-            <h3>SQLite + Supabase</h3>
-            <p>Stores completed evidence locally after agent runs, artifacts, sources, tool calls, and approvals sync to Supabase.</p>
-          </article>
-          <article class="architecture-card reveal" data-delay="240">
-            <span>Delivery</span>
-            <h3>Docker-ready runtime</h3>
-            <p>Container configuration, environment example, deployment guide, and health endpoint for evaluation environments.</p>
-          </article>
-        </div>
-
-        <div class="api-panel reveal">
           <div>
-            <p class="eyebrow">API surface</p>
-            <h3>Connected endpoints implemented</h3>
-          </div>
-          <div class="endpoint-grid">
-            <code>GET /api/health</code>
-            <code>GET /api/bootstrap</code>
-            <code>GET /api/integrations</code>
-            <code>POST /api/agent/runs</code>
-            <code>GET /api/agent/runs</code>
-            <code>GET /api/agent/runs/:id/export</code>
-            <code>GET /api/runs</code>
-            <code>POST /api/runs</code>
+            <strong>Supabase</strong>
+            <span>company evidence sync</span>
           </div>
         </div>
       </section>
 
       <section id="security" class="section company-section">
-        <div class="section-kicker reveal">Security and deployment</div>
+        <div class="section-kicker reveal visible">Security posture</div>
         <div class="split">
-          <h2 class="reveal">Company-grade direction from the first build.</h2>
-          <p class="section-text reveal" data-delay="120">
-            CivAgent is built as an internal evaluation product today, with clear
-            enterprise upgrade paths for authentication, tenancy, retention,
-            database scaling, and evidence workflows.
+          <h2 class="reveal visible">Keys stay local. Completed evidence becomes auditable.</h2>
+          <p class="section-text reveal visible">
+            The desktop app stores provider settings in the user-data directory and
+            shows masked readiness. Successful runs require Supabase persistence before
+            CivAgent marks the report completed.
           </p>
         </div>
 
-        <div class="security-layout">
-          <div class="security-card reveal">
-            <h3>Included now</h3>
-            <ul>
-              <li>Server-side validation and bounds checks</li>
-              <li>Real-agent key readiness checks</li>
-              <li>SQLite evidence persistence outside version control</li>
-              <li>Audit events for agent runs and workspace clears</li>
-              <li>Optional Supabase sync using server-side secrets</li>
-              <li>Content Security Policy and baseline browser headers</li>
-            </ul>
-          </div>
-          <div class="security-card reveal" data-delay="120">
-            <h3>Enterprise path</h3>
-            <ul>
-              <li>SSO/SAML authentication</li>
-              <li>Tenant-scoped authorization</li>
-              <li>Supabase Auth and tenant-scoped Postgres policies</li>
-              <li>SOC2 evidence export</li>
-              <li>Signed reports and retention controls</li>
-            </ul>
-          </div>
-          <div class="deployment-card reveal" data-delay="240">
-            <span>Run command</span>
-            <code>npm start</code>
-            <span>Health check</span>
-            <code>/api/health</code>
-            <span>Real agent endpoint</span>
-            <code>/api/agent/runs</code>
-          </div>
+        <div class="architecture-grid">
+          <article class="architecture-card reveal visible">
+            <span>Local</span>
+            <h3>Desktop key store</h3>
+            <p>Integration values are saved outside the repository and never rendered in full inside the interface.</p>
+          </article>
+          <article class="architecture-card reveal visible">
+            <span>Agent</span>
+            <h3>Strict readiness gate</h3>
+            <p>Runs stop with clear errors when any required provider is missing or fails.</p>
+          </article>
+          <article class="architecture-card reveal visible">
+            <span>Cloud</span>
+            <h3>Supabase record</h3>
+            <p>Runs, artifacts, sources, tool calls, approvals, and audit evidence sync before completion.</p>
+          </article>
+          <article class="architecture-card reveal visible">
+            <span>Export</span>
+            <h3>Company report</h3>
+            <p>Generated reports include provider status, evidence, approvals, and operating artifacts.</p>
+          </article>
         </div>
       </section>
 
-      <section id="governance" class="section protocol">
-        <div class="protocol-panel reveal">
+      <section id="download" class="section artifacts">
+        <div class="section-kicker reveal visible">Download</div>
+        <div class="split">
+          <h2 class="reveal visible">Run it as software, or build the desktop package.</h2>
+          <p class="section-text reveal visible">
+            During development, the same Electron shell launches the local backend and
+            opens the desktop workspace. Distribution builds package the backend sidecar
+            into the app.
+          </p>
+        </div>
+
+        <div class="download-panel reveal visible">
           <div>
-            <p class="eyebrow">Governance layer</p>
-            <h2>Controlled autonomy from day one.</h2>
-            <p id="governanceCopy">
-            CivAgent maps where agents can act alone, where humans must approve,
-              and where the organization needs source-backed evidence before deployment.
-            </p>
+            <span>Development app</span>
+            <code>npm run desktop:dev</code>
           </div>
-          <div class="metric-stack" aria-label="Governance metrics">
-            <div>
-              <span id="controlCount">12</span>
-              <small>control checks</small>
-            </div>
-            <div>
-              <span id="approvalCount">4</span>
-              <small>approval gates</small>
-            </div>
-            <div>
-              <span id="storedRuns">0</span>
-              <small>saved runs</small>
-            </div>
+          <div>
+            <span>Backend package</span>
+            <code>npm run backend:build</code>
+          </div>
+          <div>
+            <span>Desktop distribution</span>
+            <code>npm run desktop:dist</code>
           </div>
         </div>
       </section>
 
-      <section class="section company-section roadmap">
-        <div class="section-kicker reveal">Roadmap</div>
-        <div class="split">
-          <h2 class="reveal">From day-one product to enterprise platform.</h2>
-          <p class="section-text reveal" data-delay="120">
-            The current version is built to be used immediately. The next layer turns
-            CivAgent into a multi-team operating intelligence platform for companies
-            managing agent deployment across departments.
-          </p>
-        </div>
-        <div class="roadmap-grid">
-          <div class="roadmap-item reveal">
-            <span>Now</span>
-            <strong>Connected agent workspace</strong>
-            <p>Gemini reasoning, Tavily research, evidence panels, artifacts, audit, exports, and Supabase sync.</p>
-          </div>
-          <div class="roadmap-item reveal" data-delay="100">
-            <span>Next</span>
-            <strong>Team and tenant layer</strong>
-            <p>Supabase Auth, SSO, organization roles, shared runs, comments, approvals, and admin controls.</p>
-          </div>
-          <div class="roadmap-item reveal" data-delay="200">
-            <span>Scale</span>
-            <strong>Enterprise governance suite</strong>
-            <p>Postgres, retention policies, evidence exports, signed reports, and department benchmarking.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section final-cta">
-        <div class="final-panel reveal">
-          <p class="eyebrow">CivAgent</p>
-          <h2>Start designing the operating model before the agents arrive.</h2>
-          <a class="primary-action" href="#workspace">Open the workspace</a>
-        </div>
+      <section class="final-cta section">
+        <h2>CivAgent Desktop turns agent strategy into operating evidence.</h2>
+        <a class="primary-action" href="/app">Open the app workspace</a>
       </section>
     </main>
 
     <footer>
-      <span>CivAgent</span>
-      <span>Real organization intelligence agent for agentic companies</span>
+      <span>Installable organization intelligence software for agentic companies</span>
+      <a href="docs/ARCHITECTURE.md">Architecture</a>
+      <a href="docs/DEPLOYMENT.md">Deployment</a>
+      <a href="docs/SECURITY.md">Security</a>
     </footer>
-
-    <script src="script.js"></script>
   </body>
 </html>

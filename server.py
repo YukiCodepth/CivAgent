@@ -27,11 +27,12 @@ from urllib.parse import quote, unquote, urlparse
 from urllib.request import Request, urlopen
 
 
-ROOT = Path(__file__).resolve().parent
+APP_ROOT = Path(__file__).resolve().parent
+STATIC_ROOT = Path(os.environ.get("CIVAGENT_STATIC_ROOT", APP_ROOT)).resolve()
 
 
 def load_env_file() -> None:
-    env_path = ROOT / ".env"
+    env_path = APP_ROOT / ".env"
     if not env_path.exists():
         return
     for raw_line in env_path.read_text(encoding="utf-8").splitlines():
@@ -47,22 +48,136 @@ def load_env_file() -> None:
 
 load_env_file()
 
-DATA_DIR = ROOT / "data"
+DATA_DIR = APP_ROOT / "data"
 DB_PATH = Path(os.environ.get("CIVAGENT_DB", DATA_DIR / "civagent.sqlite"))
+CONFIG_PATH = Path(os.environ.get("CIVAGENT_CONFIG", DATA_DIR / "civagent-desktop-config.json"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8080"))
-AI_PROVIDER_RAW = os.environ.get("AI_PROVIDER", "")
-AI_PROVIDER = AI_PROVIDER_RAW.strip().lower() or "gemini"
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", os.environ.get("GOOGLE_API_KEY", ""))
-GEMINI_MODEL_RAW = os.environ.get("GEMINI_MODEL", "")
-GEMINI_MODEL = GEMINI_MODEL_RAW.strip() or "gemini-3-flash-preview"
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SUPABASE_PUBLISHABLE_KEY = os.environ.get("SUPABASE_PUBLISHABLE_KEY", "")
-SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY", "")
-TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
-FIRECRAWL_API_KEY = os.environ.get("FIRECRAWL_API_KEY", "")
-COMPOSIO_API_KEY = os.environ.get("COMPOSIO_API_KEY", "")
-E2B_API_KEY = os.environ.get("E2B_API_KEY", "")
+
+CONFIG_FIELDS = [
+    "AI_PROVIDER",
+    "GEMINI_MODEL",
+    "GEMINI_API_KEY",
+    "TAVILY_API_KEY",
+    "SUPABASE_URL",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SECRET_KEY",
+    "FIRECRAWL_API_KEY",
+    "COMPOSIO_API_KEY",
+    "E2B_API_KEY",
+]
+SECRET_FIELDS = {
+    "GEMINI_API_KEY",
+    "TAVILY_API_KEY",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SECRET_KEY",
+    "FIRECRAWL_API_KEY",
+    "COMPOSIO_API_KEY",
+    "E2B_API_KEY",
+}
+
+
+def load_config_file() -> dict:
+    if not CONFIG_PATH.exists():
+        return {}
+    try:
+        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {
+        key: str(data.get(key, "")).strip()
+        for key in CONFIG_FIELDS
+        if str(data.get(key, "")).strip()
+    }
+
+
+RUNTIME_CONFIG = load_config_file()
+
+
+def config_value(key: str, default: str = "") -> str:
+    env_value = os.environ.get(key)
+    if env_value:
+        return env_value.strip()
+    if key == "GEMINI_API_KEY":
+        google_key = os.environ.get("GOOGLE_API_KEY", "")
+        if google_key:
+            return google_key.strip()
+    return str(RUNTIME_CONFIG.get(key, default)).strip()
+
+
+def ai_provider_raw() -> str:
+    return config_value("AI_PROVIDER")
+
+
+def ai_provider() -> str:
+    return ai_provider_raw().strip().lower() or "gemini"
+
+
+def gemini_model_raw() -> str:
+    return config_value("GEMINI_MODEL")
+
+
+def gemini_model() -> str:
+    return gemini_model_raw().strip() or "gemini-3-flash-preview"
+
+
+def mask_config_value(value: str, reveal: bool = False) -> str:
+    if not value:
+        return ""
+    if not reveal:
+        return "configured"
+    if len(value) <= 8:
+        return "*" * len(value)
+    return f"{value[:4]}...{value[-4:]}"
+
+
+def config_status() -> dict:
+    values = {}
+    for key in CONFIG_FIELDS:
+        value = config_value(key)
+        values[key] = {
+            "configured": is_configured(value),
+            "masked": mask_config_value(value, reveal=False) if key in SECRET_FIELDS or key == "SUPABASE_URL" else value,
+            "source": "environment" if os.environ.get(key) else "desktop-config" if RUNTIME_CONFIG.get(key) else "missing",
+            "secret": key in SECRET_FIELDS,
+        }
+    return {
+        "configPath": str(CONFIG_PATH),
+        "provider": ai_provider(),
+        "values": values,
+        "integrations": integration_status(),
+    }
+
+
+def save_config_updates(payload: dict) -> dict:
+    global RUNTIME_CONFIG
+    current = load_config_file()
+    updates = payload.get("config", payload) if isinstance(payload, dict) else {}
+    if not isinstance(updates, dict):
+        raise ValueError("Config payload must be an object.")
+    for key in CONFIG_FIELDS:
+        if key not in updates:
+            continue
+        value = str(updates.get(key, "")).strip()
+        if not value or value in {"********", "••••••••"} or value.startswith("****"):
+            continue
+        if key == "AI_PROVIDER":
+            value = value.lower()
+            if value != "gemini":
+                raise ValueError("AI_PROVIDER must be gemini.")
+        current[key] = value
+    if current:
+        current["AI_PROVIDER"] = "gemini"
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CONFIG_PATH.write_text(json.dumps(current, indent=2), encoding="utf-8")
+    try:
+        CONFIG_PATH.chmod(0o600)
+    except OSError:
+        pass
+    RUNTIME_CONFIG = load_config_file()
+    return config_status()
 
 MARKETS = {
     "Enterprise SaaS",
@@ -125,19 +240,32 @@ def is_configured(value: str) -> bool:
 
 
 def integration_status() -> dict:
-    provider_ready = is_configured(AI_PROVIDER_RAW) and AI_PROVIDER == "gemini"
-    model_ready = is_configured(GEMINI_MODEL_RAW)
-    gemini_ready = is_configured(GEMINI_API_KEY)
-    tavily_ready = is_configured(TAVILY_API_KEY)
+    provider_raw = ai_provider_raw()
+    provider = ai_provider()
+    model_raw = gemini_model_raw()
+    model = gemini_model()
+    gemini_key = config_value("GEMINI_API_KEY")
+    tavily_key = config_value("TAVILY_API_KEY")
+    supabase_url = config_value("SUPABASE_URL").rstrip("/")
+    supabase_secret = config_value("SUPABASE_SECRET_KEY")
+    supabase_publishable = config_value("SUPABASE_PUBLISHABLE_KEY")
+    firecrawl_key = config_value("FIRECRAWL_API_KEY")
+    composio_key = config_value("COMPOSIO_API_KEY")
+    e2b_key = config_value("E2B_API_KEY")
+
+    provider_ready = is_configured(provider_raw) and provider == "gemini"
+    model_ready = is_configured(model_raw)
+    gemini_ready = is_configured(gemini_key)
+    tavily_ready = is_configured(tavily_key)
     supabase_ready = (
-        is_configured(SUPABASE_URL)
-        and is_configured(SUPABASE_SECRET_KEY)
-        and is_configured(SUPABASE_PUBLISHABLE_KEY)
+        is_configured(supabase_url)
+        and is_configured(supabase_secret)
+        and is_configured(supabase_publishable)
     )
-    firecrawl_ready = is_configured(FIRECRAWL_API_KEY)
-    composio_ready = is_configured(COMPOSIO_API_KEY)
+    firecrawl_ready = is_configured(firecrawl_key)
+    composio_ready = is_configured(composio_key)
     e2b_sdk_ready = importlib.util.find_spec("e2b_code_interpreter") is not None
-    e2b_ready = is_configured(E2B_API_KEY) and e2b_sdk_ready
+    e2b_ready = is_configured(e2b_key) and e2b_sdk_ready
     all_ready = all(
         [
             provider_ready,
@@ -158,21 +286,21 @@ def integration_status() -> dict:
             "configured": provider_ready,
             "required": True,
             "status": "gemini selected" if provider_ready else "AI_PROVIDER must be gemini",
-            "model": GEMINI_MODEL,
+            "model": model,
         },
         "geminiModel": {
             "name": "Gemini Model",
             "configured": model_ready,
             "required": True,
             "status": "ready" if model_ready else "missing GEMINI_MODEL",
-            "model": GEMINI_MODEL,
+            "model": model,
         },
         "gemini": {
             "name": "Gemini",
             "configured": gemini_ready,
             "required": True,
             "status": "ready" if gemini_ready else "missing GEMINI_API_KEY",
-            "model": GEMINI_MODEL,
+            "model": model,
         },
         "tavily": {
             "name": "Tavily",
@@ -205,7 +333,7 @@ def integration_status() -> dict:
             "status": "ready"
             if e2b_ready
             else "missing E2B_API_KEY"
-            if not is_configured(E2B_API_KEY)
+            if not is_configured(e2b_key)
             else "missing e2b-code-interpreter package; run npm run setup:python",
         },
     }
@@ -465,7 +593,8 @@ def tool_event(tool_name: str, status: str, input_data: dict, output_data: dict)
 
 
 def tavily_research(profile: dict) -> tuple[list[dict], list[dict]]:
-    if not is_configured(TAVILY_API_KEY):
+    tavily_key = config_value("TAVILY_API_KEY")
+    if not is_configured(tavily_key):
         raise IntegrationMissing("TAVILY_API_KEY is required for real organization research.")
 
     query = (
@@ -483,7 +612,7 @@ def tavily_research(profile: dict) -> tuple[list[dict], list[dict]]:
         "POST",
         "https://api.tavily.com/search",
         payload,
-        {"Authorization": f"Bearer {TAVILY_API_KEY}"},
+        {"Authorization": f"Bearer {tavily_key}"},
         timeout=35,
     )
     sources = []
@@ -514,7 +643,8 @@ def tavily_research(profile: dict) -> tuple[list[dict], list[dict]]:
 def firecrawl_extract(profile: dict) -> tuple[list[dict], list[dict]]:
     if not profile.get("website"):
         raise ValueError("Website URL is required because Firecrawl must run on every real agent run.")
-    if not is_configured(FIRECRAWL_API_KEY):
+    firecrawl_key = config_value("FIRECRAWL_API_KEY")
+    if not is_configured(firecrawl_key):
         raise IntegrationMissing("FIRECRAWL_API_KEY is required for website extraction.")
 
     payload = {
@@ -527,7 +657,7 @@ def firecrawl_extract(profile: dict) -> tuple[list[dict], list[dict]]:
         "POST",
         "https://api.firecrawl.dev/v2/scrape",
         payload,
-        {"Authorization": f"Bearer {FIRECRAWL_API_KEY}"},
+        {"Authorization": f"Bearer {firecrawl_key}"},
         timeout=55,
     )
     markdown = ""
@@ -545,13 +675,14 @@ def firecrawl_extract(profile: dict) -> tuple[list[dict], list[dict]]:
 
 
 def composio_toolkit_probe() -> tuple[list[dict], list[dict]]:
-    if not is_configured(COMPOSIO_API_KEY):
+    composio_key = config_value("COMPOSIO_API_KEY")
+    if not is_configured(composio_key):
         raise IntegrationMissing("COMPOSIO_API_KEY is required for SaaS tool discovery.")
     data = http_json(
         "GET",
         "https://backend.composio.dev/api/v3/toolkits",
         None,
-        {"x-api-key": COMPOSIO_API_KEY},
+        {"x-api-key": composio_key},
         timeout=25,
     )
     raw_toolkits = data.get("items", data.get("toolkits", [])) if isinstance(data, dict) else []
@@ -578,12 +709,15 @@ def composio_toolkit_probe() -> tuple[list[dict], list[dict]]:
 
 
 def sandbox_analysis(profile: dict, sources: list[dict], tool_calls: list[dict]) -> list[dict]:
-    if not is_configured(E2B_API_KEY):
+    e2b_key = config_value("E2B_API_KEY")
+    if not is_configured(e2b_key):
         raise IntegrationMissing("E2B_API_KEY is required for sandboxed analysis.")
     try:
         from e2b_code_interpreter import Sandbox
     except ImportError as exc:
         raise ExternalServiceError("E2B SDK is not installed. Run `npm run setup:python` before production agent runs.") from exc
+
+    os.environ["E2B_API_KEY"] = e2b_key
 
     code = """
 import json
@@ -693,7 +827,9 @@ def parse_json_object(text: str) -> dict:
 
 
 def run_gemini_generate_content(profile: dict, sources: list[dict], tool_calls: list[dict]) -> tuple[dict, list[dict]]:
-    if not is_configured(GEMINI_API_KEY):
+    gemini_key = config_value("GEMINI_API_KEY")
+    model = gemini_model()
+    if not is_configured(gemini_key):
         raise IntegrationMissing("GEMINI_API_KEY is required for real agent generation.")
     payload = {
         "contents": [
@@ -715,19 +851,19 @@ def run_gemini_generate_content(profile: dict, sources: list[dict], tool_calls: 
             "temperature": 0.35,
         },
     }
-    model_path = quote(GEMINI_MODEL, safe="")
+    model_path = quote(model, safe="")
     data = http_json(
         "POST",
         f"https://generativelanguage.googleapis.com/v1beta/models/{model_path}:generateContent",
         payload,
-        {"x-goog-api-key": GEMINI_API_KEY},
+        {"x-goog-api-key": gemini_key},
         timeout=90,
     )
     text = extract_gemini_text(data)
     event = tool_event(
         "gemini.generateContent",
         "completed",
-        {"model": GEMINI_MODEL, "sourceCount": len(sources)},
+        {"model": model, "sourceCount": len(sources)},
         {"candidates": len(data.get("candidates", []) or []), "characters": len(text)},
     )
     return parse_json_object(text), [event]
@@ -858,7 +994,7 @@ def build_real_agent_run(profile: dict) -> dict:
     try:
         generated, model_calls = run_model_generation(profile, sources, tool_calls)
     except json.JSONDecodeError as exc:
-        raise ExternalServiceError(f"{AI_PROVIDER.title()} returned non-JSON output: {exc}") from exc
+        raise ExternalServiceError(f"{ai_provider().title()} returned non-JSON output: {exc}") from exc
     tool_calls.extend(model_calls)
 
     result = coerce_agent_output(profile, generated, sources, tool_calls)
@@ -868,7 +1004,7 @@ def build_real_agent_run(profile: dict) -> dict:
             "createdAt": created_at,
             "status": "completed",
             "mode": "real-agent",
-            "model": GEMINI_MODEL,
+            "model": gemini_model(),
             "provider": "gemini",
             "horizonLabel": HORIZONS[profile["horizon"]],
         }
@@ -947,11 +1083,15 @@ def save_run(result: dict) -> dict:
 
 
 def supabase_key() -> str:
-    return SUPABASE_SECRET_KEY
+    return config_value("SUPABASE_SECRET_KEY")
 
 
 def supabase_enabled() -> bool:
-    return bool(SUPABASE_URL and SUPABASE_SECRET_KEY and SUPABASE_PUBLISHABLE_KEY)
+    return bool(
+        config_value("SUPABASE_URL")
+        and config_value("SUPABASE_SECRET_KEY")
+        and config_value("SUPABASE_PUBLISHABLE_KEY")
+    )
 
 
 def supabase_insert(table: str, row: dict) -> None:
@@ -960,7 +1100,7 @@ def supabase_insert(table: str, row: dict) -> None:
         raise IntegrationMissing("Supabase URL, secret key, and publishable key are required for company-grade sync.")
     http_json(
         "POST",
-        f"{SUPABASE_URL}/rest/v1/{table}",
+        f"{config_value('SUPABASE_URL').rstrip('/')}/rest/v1/{table}",
         row,
         {
             "apikey": key,
@@ -1309,9 +1449,13 @@ class CivAgentHandler(BaseHTTPRequestHandler):
                     "agentRuns": agent_runs,
                     "audit": audit_events(10),
                     "integrations": integration_status(),
+                    "config": config_status(),
                     "mode": "server",
                 },
             )
+            return
+        if path == "/api/config/status":
+            self.json_response(HTTPStatus.OK, {"config": config_status(), "integrations": integration_status(), "mode": "server"})
             return
         if path == "/api/integrations":
             self.json_response(HTTPStatus.OK, {"integrations": integration_status(), "mode": "server"})
@@ -1378,6 +1522,37 @@ class CivAgentHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
+        if parsed.path == "/api/config":
+            try:
+                status = save_config_updates(self.read_json())
+                with db() as conn:
+                    write_audit(
+                        conn,
+                        "config.updated",
+                        None,
+                        {
+                            "configured": [
+                                key
+                                for key, item in status["values"].items()
+                                if item.get("configured")
+                            ],
+                            "configPath": status["configPath"],
+                        },
+                    )
+                self.json_response(
+                    HTTPStatus.OK,
+                    {
+                        "config": status,
+                        "integrations": integration_status(),
+                        "audit": audit_events(10),
+                        "mode": "server",
+                    },
+                )
+            except (ValueError, json.JSONDecodeError) as exc:
+                self.error_json(HTTPStatus.BAD_REQUEST, str(exc))
+            except OSError as exc:
+                self.error_json(HTTPStatus.INTERNAL_SERVER_ERROR, f"Could not save desktop config: {exc}")
+            return
         if parsed.path == "/api/agent/runs":
             profile = None
             try:
@@ -1432,10 +1607,10 @@ class CivAgentHandler(BaseHTTPRequestHandler):
         self.json_response(HTTPStatus.OK, {"runs": [], "audit": audit_events(10), "mode": "server"})
 
     def serve_static(self, path: str) -> None:
-        decoded = unquote(path).lstrip("/") or "index.html"
-        candidate = (ROOT / decoded).resolve()
-        if not str(candidate).startswith(str(ROOT)) or not candidate.is_file():
-            candidate = ROOT / "index.html"
+        decoded = "app.html" if path in {"/app", "/app/"} else unquote(path).lstrip("/") or "index.html"
+        candidate = (STATIC_ROOT / decoded).resolve()
+        if not str(candidate).startswith(str(STATIC_ROOT)) or not candidate.is_file():
+            candidate = STATIC_ROOT / "index.html"
         content_type = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
         body = candidate.read_bytes()
         self.send_response(HTTPStatus.OK)

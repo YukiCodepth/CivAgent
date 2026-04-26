@@ -7,3 +7,6 @@ __pycache__/
 *.sqlite-wal
 .DS_Store
 node_modules/
+build-backend/
+dist-backend/
+release/

@@ -1,0 +1,61 @@
+<svg width="1320" height="300" viewBox="0 0 1320 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">CivAgent wordmark</title>
+  <desc id="desc">CivAgent wordmark with an orbital gateway mark and premium geometric typography.</desc>
+  <defs>
+    <radialGradient id="wmCoreGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(152 150) rotate(90) scale(106)">
+      <stop offset="0" stop-color="#10231F"/>
+      <stop offset="0.46" stop-color="#09100F"/>
+      <stop offset="1" stop-color="#020403" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wmTealArc" x1="84" y1="74" x2="220" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDF9EA"/>
+      <stop offset="0.24" stop-color="#72E0C4"/>
+      <stop offset="0.64" stop-color="#1D796D"/>
+      <stop offset="1" stop-color="#081312"/>
+    </linearGradient>
+    <linearGradient id="wmAmberArc" x1="210" y1="70" x2="101" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE6A8"/>
+      <stop offset="0.26" stop-color="#FFB454"/>
+      <stop offset="0.63" stop-color="#D86E45"/>
+      <stop offset="1" stop-color="#120906"/>
+    </linearGradient>
+    <linearGradient id="word" x1="282" y1="62" x2="1058" y2="242" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F4EA"/>
+      <stop offset="0.5" stop-color="#DDEED3"/>
+      <stop offset="1" stop-color="#72E0C4"/>
+    </linearGradient>
+    <linearGradient id="sub" x1="296" y1="222" x2="850" y2="222" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72E0C4"/>
+      <stop offset="1" stop-color="#FFB454"/>
+    </linearGradient>
+    <filter id="wmSoftGlow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="4.4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.32 0 0 0 0 0.88 0 0 0 0 0.77 0 0 0 0.72 0"/>
+      <feBlend in2="SourceGraphic" mode="screen"/>
+    </filter>
+    <filter id="wmAmberGlow" x="-18%" y="-18%" width="136%" height="136%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3.4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 1 0 0 0 0 0.58 0 0 0 0 0.22 0 0 0 0.58 0"/>
+      <feBlend in2="SourceGraphic" mode="screen"/>
+    </filter>
+    <clipPath id="wmOrbitalClip">
+      <rect x="26" y="24" width="252" height="252" rx="53"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#wmOrbitalClip)">
+    <rect x="26" y="24" width="252" height="252" rx="53" fill="#050706"/>
+    <circle cx="152" cy="150" r="116" fill="url(#wmCoreGlow)"/>
+    <path d="M209.1 62.6C180.6 46.4 139.8 47.6 109.5 69.2C76.8 92.6 61.3 130.5 69.7 166.9C78.5 206 110.5 234 149.1 238.4C174.7 241.4 199.3 233.7 217.2 217.5C222.4 212.8 222.6 204.7 217.7 199.5C213 194.6 205.3 194.6 200.1 199.2C186.1 211.8 166.9 217.5 147.3 215C118.7 211.6 95.1 190.9 88.5 162.6C82.1 135.3 93.9 106.8 118.8 89.1C142.4 72.4 174.4 70.9 196.3 83.2C202.7 86.9 210.8 84.7 214.5 78.6C218.2 72.2 215.5 66.3 209.1 62.6Z" fill="url(#wmTealArc)" filter="url(#wmSoftGlow)"/>
+    <path d="M220.9 96.1C239.4 120.9 243.1 155.4 230.5 184.2C226.6 193.6 221.2 202.2 214.3 209.8C209.6 215 201.7 215.5 196.3 211.1C190.9 206.6 190.2 198.7 194.6 193.3C199.5 187.4 203.7 181 206.9 173.8C215.5 154.1 213 130.5 200.2 113.5C195.3 107.1 196.5 98 202.9 93.1C209.3 88.1 216 89.4 220.9 96.1Z" fill="url(#wmAmberArc)" filter="url(#wmAmberGlow)"/>
+    <path d="M152 97.8C180.8 97.8 204.1 121.2 204.1 150C204.1 178.8 180.8 202.2 152 202.2C123.2 202.2 99.8 178.8 99.8 150C99.8 121.2 123.2 97.8 152 97.8ZM152 118C134.3 118 120 132.3 120 150C120 167.7 134.3 182 152 182C169.7 182 184 167.7 184 150C184 132.3 169.7 118 152 118Z" fill="#F5F1E8" fill-opacity="0.92"/>
+    <path d="M152 125.6C165.5 125.6 176.4 136.5 176.4 150C176.4 163.5 165.5 174.4 152 174.4C138.5 174.4 127.6 163.5 127.6 150C127.6 136.5 138.5 125.6 152 125.6Z" fill="#050706"/>
+    <path d="M231 150.2H181.8" stroke="#FFB454" stroke-width="6.9" stroke-linecap="round"/>
+    <path d="M122.2 71.2L135.2 101.2" stroke="#72E0C4" stroke-width="5.9" stroke-linecap="round"/>
+    <path d="M96.4 205.8L123.9 186.8" stroke="#DDEED3" stroke-width="4.9" stroke-linecap="round" opacity="0.82"/>
+    <circle cx="231" cy="150.2" r="7.6" fill="#FFB454"/>
+    <circle cx="122.2" cy="71.2" r="6.9" fill="#72E0C4"/>
+    <circle cx="96.4" cy="205.8" r="5.7" fill="#DDEED3"/>
+  </g>
+  <text x="306" y="158" fill="url(#word)" font-family="Inter, Avenir Next, Helvetica, Arial, sans-serif" font-size="116" font-weight="800" letter-spacing="0">CivAgent</text>
+  <text x="312" y="220" fill="url(#sub)" font-family="Inter, Avenir Next, Helvetica, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="9">DESKTOP ORGANIZATION INTELLIGENCE</text>
+</svg>

@@ -138,7 +138,7 @@
         min-width: 1100px;
       }
 
-      .fallback {
+      .load-message {
         display: none;
         max-width: 760px;
         margin: 80px auto;
@@ -190,7 +190,7 @@
     <header>
       <div>
         <h1>CivAgent Workflow Diagram</h1>
-        <p>Drag to move. Use controls to zoom the fully connected agent workflow.</p>
+        <p>Drag to move. Use controls to zoom the CivAgent Desktop workflow.</p>
       </div>
       <nav class="actions" aria-label="Diagram controls">
         <button type="button" id="zoomOut">Zoom out</button>
@@ -206,31 +206,34 @@
         <div class="diagram" id="diagram">
           <pre class="mermaid" id="mermaidSource">
 flowchart LR
-  classDef ui fill:#10201d,stroke:#72e0c4,color:#f7f3e8,stroke-width:1px
+  classDef desktop fill:#10201d,stroke:#72e0c4,color:#f7f3e8,stroke-width:1px
   classDef gate fill:#2a2112,stroke:#ffb454,color:#f7f3e8,stroke-width:1px
   classDef tool fill:#111827,stroke:#9fd7ff,color:#f7f3e8,stroke-width:1px
   classDef model fill:#201734,stroke:#c6b6ff,color:#f7f3e8,stroke-width:1px
   classDef store fill:#142018,stroke:#ddeed3,color:#f7f3e8,stroke-width:1px
   classDef output fill:#241515,stroke:#ff9f8a,color:#f7f3e8,stroke-width:1px
 
-  A["Company Workspace"]:::ui --> B["/api/agent/runs"]:::ui
-  B --> C{"Strict Readiness Gate"}:::gate
-  C --> D["Tavily Live Research"]:::tool
-  C --> E["Firecrawl Website Extraction"]:::tool
-  C --> F["Composio SaaS Tool Graph"]:::tool
-  C --> G["E2B Sandboxed Analysis"]:::tool
-  D --> H["Evidence Bundle"]:::store
-  E --> H
-  F --> H
-  G --> H
-  H --> I["Gemini Organization Intelligence"]:::model
-  I --> J["Operating Artifacts"]:::output
-  J --> K["Supabase Evidence Sync"]:::store
-  K --> L["SQLite Local Record"]:::store
-  L --> M["Workspace Report + Export"]:::output
-  C -. missing key or provider failure .-> N["agent_run.failed audit event"]:::output
+  A["Electron Desktop"]:::desktop --> B["Python Backend Sidecar"]:::desktop
+  B --> C["/app Workspace"]:::desktop
+  C --> D["/api/config Status + Save"]:::desktop
+  C --> E["/api/agent/runs"]:::desktop
+  E --> F{"Strict Readiness Gate"}:::gate
+  F --> G["Tavily Live Research"]:::tool
+  F --> H["Firecrawl Website Extraction"]:::tool
+  F --> I["Composio Tool Graph"]:::tool
+  F --> J["E2B Sandboxed Analysis"]:::tool
+  G --> K["Evidence Bundle"]:::store
+  H --> K
+  I --> K
+  J --> K
+  K --> L["Gemini Organization Intelligence"]:::model
+  L --> M["Operating Artifacts"]:::output
+  M --> N["Supabase Evidence Sync"]:::store
+  N --> O["SQLite Local Record"]:::store
+  O --> P["Desktop Report + Export"]:::output
+  F -. missing key or provider failure .-> Q["agent_run.failed audit event"]:::output
           </pre>
-          <div class="fallback" id="fallback">
+          <div class="load-message" id="loadMessage">
             Mermaid could not load from the CDN. The workflow source is still available in this file and in the README.
           </div>
         </div>
@@ -250,7 +253,7 @@ flowchart LR
       const diagram = document.getElementById("diagram");
       const viewport = document.getElementById("viewport");
       const zoomLabel = document.getElementById("zoomLabel");
-      const fallback = document.getElementById("fallback");
+      const loadMessage = document.getElementById("loadMessage");
       let scale = window.innerWidth < 760 ? 0.74 : 0.86;
       let x = window.innerWidth < 760 ? -220 : -560;
       let y = -330;
@@ -337,7 +340,7 @@ flowchart LR
         await mermaid.default.run({ querySelector: ".mermaid" });
       } catch (error) {
         document.getElementById("mermaidSource").style.display = "none";
-        fallback.style.display = "block";
+        loadMessage.style.display = "block";
       }
     </script>
   </body>
