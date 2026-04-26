@@ -15,6 +15,7 @@ import importlib.util
 import mimetypes
 import os
 import re
+import ssl
 import sqlite3
 import sys
 import uuid
@@ -57,6 +58,18 @@ DATA_DIR = APP_ROOT / "data"
 DB_PATH = Path(os.environ.get("CIVAGENT_DB", DATA_DIR / "civagent.sqlite"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8080"))
+
+
+def https_context() -> ssl.SSLContext:
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        return ssl.create_default_context()
+
+
+HTTPS_CONTEXT = https_context()
 
 CONFIG_FIELDS = [
     "AI_PROVIDER",
@@ -302,10 +315,15 @@ def compact_text(value: str, limit: int = 900) -> str:
 
 def http_json(method: str, url: str, payload: dict | None = None, headers: dict | None = None, timeout: int = 30) -> dict:
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
-    request_headers = {"Content-Type": "application/json", **(headers or {})}
+    request_headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "CivAgent/1.0.1",
+        **(headers or {}),
+    }
     request = Request(url, data=body, headers=request_headers, method=method)
     try:
-        with urlopen(request, timeout=timeout) as response:
+        with urlopen(request, timeout=timeout, context=HTTPS_CONTEXT) as response:
             data = response.read().decode("utf-8")
             return json.loads(data) if data else {}
     except HTTPError as exc:
@@ -636,7 +654,7 @@ def composio_toolkit_probe() -> tuple[list[dict], list[dict]]:
         raise IntegrationMissing("COMPOSIO_API_KEY is required for SaaS tool discovery.")
     data = http_json(
         "GET",
-        "https://backend.composio.dev/api/v3/toolkits",
+        "https://backend.composio.dev/api/v3.1/toolkits?limit=12&sort_by=usage",
         None,
         {"x-api-key": composio_key},
         timeout=25,
@@ -658,7 +676,7 @@ def composio_toolkit_probe() -> tuple[list[dict], list[dict]]:
     source = {
         "provider": "composio",
         "title": "Composio SaaS action toolkit graph",
-        "url": "https://backend.composio.dev/api/v3/toolkits",
+        "url": "https://backend.composio.dev/api/v3.1/toolkits",
         "snippet": compact_text("; ".join(item["name"] for item in toolkits), 620),
     }
     return [source], [tool_event("composio.toolkits", "completed", {"limit": 12}, {"availableToolkits": len(toolkits), "toolkits": toolkits})]

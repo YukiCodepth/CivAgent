@@ -134,6 +134,34 @@ function syncRangeOutputs() {
   document.getElementById("riskOutput").textContent = form.elements.riskTolerance.value;
 }
 
+function previewCurrentProfile() {
+  syncRangeOutputs();
+  const profile = getProfileFromForm();
+  activeRun = {
+    ...calculateRun(profile),
+    mode: "configuration-preview",
+    sources: [],
+    toolCalls: [],
+    approvals: []
+  };
+  writeStore(profile, savedRuns);
+  renderScore(activeRun);
+  renderBrief(activeRun);
+  renderArtifacts(activeRun);
+  renderRuns();
+  renderIntegrations();
+  renderAgentNotice();
+  renderAgentTimeline(activeRun);
+  renderSources(activeRun);
+  renderToolsAndApprovals(activeRun);
+}
+
+function handleInvalidField(event) {
+  if (event.target?.name === "website") {
+    renderAgentNotice("Website URL is required before CivAgent can run Firecrawl extraction.");
+  }
+}
+
 function rolePack(market) {
   const packs = {
     "Enterprise SaaS": ["Market Scout", "Pipeline Operator", "Onboarding Architect", "Trust Sentinel"],
@@ -387,9 +415,13 @@ function renderAudit() {
     card.className = "audit-event";
     label.textContent = new Date(event.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
     title.textContent = event.action;
-    body.textContent = event.metadata?.orgName
-      ? `${event.metadata.orgName} | ${event.metadata.readiness}% readiness | ${event.metadata.risk} risk`
-      : JSON.stringify(event.metadata || {});
+    if (event.metadata?.error) {
+      body.textContent = `${event.metadata.orgName || "unknown"} | ${event.metadata.error}`;
+    } else if (event.metadata?.orgName && event.metadata?.readiness !== undefined && event.metadata?.risk) {
+      body.textContent = `${event.metadata.orgName} | ${event.metadata.readiness}% readiness | ${event.metadata.risk} risk`;
+    } else {
+      body.textContent = JSON.stringify(event.metadata || {});
+    }
     card.append(label, title, body);
     auditList.append(card);
   });
@@ -605,6 +637,11 @@ function saveRun(run) {
 async function runSimulation(event) {
   event?.preventDefault();
   const profile = getProfileFromForm();
+  if (!profile.website) {
+    form.elements.website.focus();
+    renderAgentNotice("Website URL is required before CivAgent can run Firecrawl extraction.");
+    return;
+  }
   if (serverMode) {
     if (!agentAvailable) {
       renderAgentNotice(`Real agent is not configured yet. Add these to .env and restart: ${missingRequiredStatuses().join("; ") || "required integrations"}.`);
@@ -819,7 +856,8 @@ window.addEventListener("scroll", updateScroll, { passive: true });
 window.addEventListener("hashchange", scheduleReveal);
 window.addEventListener("load", scheduleReveal);
 form.addEventListener("submit", runSimulation);
-form.addEventListener("input", syncRangeOutputs);
+form.addEventListener("input", previewCurrentProfile);
+form.addEventListener("invalid", handleInvalidField, true);
 exportRunButton.addEventListener("click", exportActiveRun);
 clearRunsButton.addEventListener("click", clearRuns);
 resetWorkspaceButton.addEventListener("click", resetWorkspace);

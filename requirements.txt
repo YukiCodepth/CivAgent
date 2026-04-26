@@ -1,3 +1,4 @@
+certifi>=2024.8.30
 e2b-code-interpreter>=2.5.0
 pillow>=10.4.0
 pyinstaller>=6.6.0
