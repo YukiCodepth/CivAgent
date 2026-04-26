@@ -134,16 +134,21 @@ function syncRangeOutputs() {
   document.getElementById("riskOutput").textContent = form.elements.riskTolerance.value;
 }
 
+function previewRun(profile, mode = "configuration-preview", extra = {}) {
+  return {
+    ...calculateRun(profile),
+    mode,
+    sources: [],
+    toolCalls: [],
+    approvals: [],
+    ...extra
+  };
+}
+
 function previewCurrentProfile() {
   syncRangeOutputs();
   const profile = getProfileFromForm();
-  activeRun = {
-    ...calculateRun(profile),
-    mode: "configuration-preview",
-    sources: [],
-    toolCalls: [],
-    approvals: []
-  };
+  activeRun = previewRun(profile);
   writeStore(profile, savedRuns);
   renderScore(activeRun);
   renderBrief(activeRun);
@@ -288,11 +293,19 @@ function renderScore(run) {
 
 function renderBrief(run) {
   brief.replaceChildren();
+  const modeLabel =
+    run.mode === "real-agent"
+      ? `Live Gemini ${run.model || ""}`
+      : run.mode === "agent-running"
+        ? "Real agent running"
+        : run.mode === "agent-failed"
+          ? "Real agent failed"
+          : "Configuration preview";
   [
-    ["Agent mode", run.mode === "real-agent" ? `Live Gemini ${run.model || ""}` : "Configuration preview"],
+    ["Agent mode", modeLabel],
     ["Operating memo", run.artifacts.memo[0]],
     ["Agent roster", run.roles.join(", ")],
-    ["Risk queue", run.artifacts.risks[0]],
+    ["Risk queue", run.error || run.artifacts.risks[0]],
     ["Deployment decision", run.deployment]
   ].forEach(([label, value]) => {
     const line = document.createElement("div");
@@ -515,19 +528,36 @@ function renderAgentNotice(message) {
 function renderAgentTimeline(run) {
   if (!agentTimeline) return;
   agentTimeline.replaceChildren();
-  const steps = run?.mode === "real-agent"
-    ? [
-        ["01", "Research Agent", `${run.sources?.length || 0} source signals collected.`],
-        ["02", "Workflow Architect", `${run.roles?.length || 0} deployable agent roles designed.`],
-        ["03", "Risk Governor", `${run.approvalGates || 0} approval gates and ${run.controlChecks || 0} control checks mapped.`],
-        ["04", "Venture Strategist", "Business model, launch wedge, and moat memo generated."],
-        ["05", "Orchestrator", `${run.toolCalls?.length || 0} tool events recorded and report exported.`]
-      ]
-    : [
-        ["01", "Configuration preview", "Waiting for required integrations before live research starts."],
-        ["02", ".env readiness", "Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B must all be present in .env or the backend environment."],
-        ["03", "No local completion", "CivAgent only completes runs after every required provider succeeds."]
-      ];
+  let steps;
+  if (run?.mode === "real-agent") {
+    steps = [
+      ["01", "Research Agent", `${run.sources?.length || 0} source signals collected.`],
+      ["02", "Workflow Architect", `${run.roles?.length || 0} deployable agent roles designed.`],
+      ["03", "Risk Governor", `${run.approvalGates || 0} approval gates and ${run.controlChecks || 0} control checks mapped.`],
+      ["04", "Venture Strategist", "Business model, launch wedge, and moat memo generated."],
+      ["05", "Orchestrator", `${run.toolCalls?.length || 0} tool events recorded and report exported.`]
+    ];
+  } else if (run?.mode === "agent-running") {
+    steps = [
+      ["01", "Tavily research", "Live market and company research is running."],
+      ["02", "Firecrawl crawl", "The submitted website is being scraped for evidence."],
+      ["03", "Composio graph", "SaaS action toolkits are being fetched."],
+      ["04", "E2B sandbox", "ROI, workflow, and risk scoring will execute in sandbox."],
+      ["05", "Gemini + Supabase", "Artifacts will generate and sync only after every provider succeeds."]
+    ];
+  } else if (run?.mode === "agent-failed") {
+    steps = [
+      ["01", "Run failed", run.error || "A required provider failed."],
+      ["02", "No local completion", "CivAgent did not mark the run completed."],
+      ["03", "Fix provider", "Update the failing API key, provider account, or Supabase table setup, then rerun."]
+    ];
+  } else {
+    steps = [
+      ["01", "Configuration preview", "Waiting for required integrations before live research starts."],
+      ["02", ".env readiness", "Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B must all be present in .env or the backend environment."],
+      ["03", "No local completion", "CivAgent only completes runs after every required provider succeeds."]
+    ];
+  }
 
   steps.forEach(([number, title, body], index) => {
     const node = document.createElement("div");
@@ -581,7 +611,31 @@ function renderToolsAndApprovals(run) {
   toolList.replaceChildren();
   approvalList.replaceChildren();
   const calls = run?.toolCalls || [];
-  if (!calls.length) {
+  if (run?.mode === "agent-running") {
+    ["tavily.search", "firecrawl.scrape", "composio.toolkits", "e2b.sandbox", "gemini.generate", "supabase.sync"].forEach(name => {
+      const card = document.createElement("div");
+      const title = document.createElement("strong");
+      const status = document.createElement("span");
+      const body = document.createElement("p");
+      card.className = "tool-card running";
+      status.textContent = "running";
+      title.textContent = name;
+      body.textContent = "Awaiting provider response.";
+      card.append(status, title, body);
+      toolList.append(card);
+    });
+  } else if (run?.mode === "agent-failed") {
+    const card = document.createElement("div");
+    const title = document.createElement("strong");
+    const status = document.createElement("span");
+    const body = document.createElement("p");
+    card.className = "tool-card failed";
+    status.textContent = "failed";
+    title.textContent = "required provider";
+    body.textContent = run.error || "A required provider failed.";
+    card.append(status, title, body);
+    toolList.append(card);
+  } else if (!calls.length) {
     const empty = document.createElement("div");
     empty.className = "tool-card";
     empty.innerHTML = "<strong>No tool calls yet</strong><p>Gemini, Tavily, Firecrawl, Composio, E2B, and Supabase events appear here.</p>";
@@ -629,6 +683,16 @@ function renderAll(run) {
   renderToolsAndApprovals(run);
 }
 
+function safeRenderAll(run, notice) {
+  try {
+    renderAll(run);
+  } catch (error) {
+    console.warn(error);
+    renderAgentNotice(`Interface render error: ${error.message || error}. Backend run was not marked completed.`);
+  }
+  if (notice) renderAgentNotice(notice);
+}
+
 function saveRun(run) {
   savedRuns = [run, ...savedRuns.filter(item => item.id !== run.id)].slice(0, 8);
   writeStore(run.profile, savedRuns);
@@ -649,7 +713,8 @@ async function runSimulation(event) {
     }
     runAgentButton.disabled = true;
     runAgentButton.textContent = "Agent running...";
-    renderAgentNotice("Running live organization agent: researching, calling tools, generating artifacts, and saving evidence.");
+    activeRun = previewRun(profile, "agent-running");
+    safeRenderAll(activeRun, "Running live organization agent: researching, calling tools, generating artifacts, and saving evidence.");
     try {
       const data = await apiRequest("/api/agent/runs", {
         method: "POST",
@@ -663,12 +728,22 @@ async function runSimulation(event) {
       setForm(activeRun.profile);
       writeStore(activeRun.profile, savedRuns);
       setWorkspaceMode(agentAvailable ? "agent" : "server");
-      renderAll(activeRun);
+      safeRenderAll(activeRun);
       return;
     } catch (error) {
-      renderAgentNotice(error.message || "Real agent run failed. Check your .env values and server logs.");
+      const message = error.message || "Real agent run failed. Check your .env values and server logs.";
+      activeRun = previewRun(profile, "agent-failed", { error: message });
+      try {
+        const data = await apiRequest("/api/bootstrap");
+        auditEvents = data.audit || auditEvents;
+        integrationState = data.integrations || integrationState;
+        configState = data.config || configState;
+        savedRuns = Array.isArray(data.agentRuns) ? data.agentRuns : savedRuns;
+      } catch (refreshError) {
+        console.warn(refreshError);
+      }
+      safeRenderAll(activeRun, `Run failed: ${message}`);
       console.warn(error);
-      renderAll(activeRun);
       return;
     } finally {
       runAgentButton.disabled = serverMode && !agentAvailable;
@@ -726,6 +801,9 @@ async function clearRuns() {
 
 function resetWorkspace() {
   setForm(defaultProfile);
+  activeRun = previewRun(defaultProfile);
+  writeStore(defaultProfile, savedRuns);
+  safeRenderAll(activeRun);
   if (serverMode) {
     renderAgentNotice("Profile reset. Run the real organization agent after your .env values are configured.");
     return;
@@ -855,8 +933,16 @@ window.addEventListener("resize", resize);
 window.addEventListener("scroll", updateScroll, { passive: true });
 window.addEventListener("hashchange", scheduleReveal);
 window.addEventListener("load", scheduleReveal);
+window.addEventListener("error", event => {
+  renderAgentNotice(`Interface error: ${event.message}. Check the terminal and refresh CivAgent.`);
+});
+window.addEventListener("unhandledrejection", event => {
+  const reason = event.reason?.message || event.reason || "Unknown promise error";
+  renderAgentNotice(`Interface error: ${reason}. Check the terminal and refresh CivAgent.`);
+});
 form.addEventListener("submit", runSimulation);
 form.addEventListener("input", previewCurrentProfile);
+form.addEventListener("change", previewCurrentProfile);
 form.addEventListener("invalid", handleInvalidField, true);
 exportRunButton.addEventListener("click", exportActiveRun);
 clearRunsButton.addEventListener("click", clearRuns);

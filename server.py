@@ -1564,6 +1564,8 @@ class CivAgentHandler(BaseHTTPRequestHandler):
         body = candidate.read_bytes()
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", content_type)
+        if candidate.suffix in {".html", ".js", ".css"}:
+            self.send_header("Cache-Control", "no-store, max-age=0")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

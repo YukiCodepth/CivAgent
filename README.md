@@ -6,7 +6,7 @@
 
 ### Company-grade organization intelligence software for deploying AI agents into real operations.
 
-[![Release](https://img.shields.io/badge/release-v1.0.1-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.1)
+[![Release](https://img.shields.io/badge/release-v1.0.2-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.2)
 [![Desktop](https://img.shields.io/badge/app-Electron%20Desktop-ffb454?style=for-the-badge)](#-download)
 [![Model](https://img.shields.io/badge/model-Gemini-ddeed3?style=for-the-badge)](#-required-stack)
 [![Sync](https://img.shields.io/badge/sync-Supabase%20Required-111111?style=for-the-badge)](#-required-stack)
@@ -21,14 +21,14 @@
 
 ## ⚡ Download
 
-Install CivAgent Desktop from the public [`v1.0.1` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.1).
+Install CivAgent Desktop from the public [`v1.0.2` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.2).
 
 | Platform | Download |
 | --- | --- |
-| macOS | [`CivAgent-Desktop-1.0.1-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-mac-arm64.dmg) |
-| macOS ZIP | [`CivAgent-Desktop-1.0.1-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-mac-arm64.zip) |
-| Windows | [`CivAgent-Desktop-1.0.1-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-win-x64.exe) |
-| Linux | [`CivAgent-Desktop-1.0.1-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-linux-x86_64.AppImage) |
+| macOS | [`CivAgent-Desktop-1.0.2-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-mac-arm64.dmg) |
+| macOS ZIP | [`CivAgent-Desktop-1.0.2-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-mac-arm64.zip) |
+| Windows | [`CivAgent-Desktop-1.0.2-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-win-x64.exe) |
+| Linux | [`CivAgent-Desktop-1.0.2-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-linux-x86_64.AppImage) |
 
 > macOS builds are unsigned until Apple Developer signing credentials are added, so macOS may show a first-open security warning.
 

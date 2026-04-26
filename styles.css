@@ -868,6 +868,20 @@ button:disabled {
   color: var(--teal);
 }
 
+.tool-card.running {
+  border-color: rgba(82, 224, 196, 0.3);
+  background: rgba(82, 224, 196, 0.06);
+}
+
+.tool-card.running span {
+  color: var(--teal);
+}
+
+.tool-card.failed {
+  border-color: rgba(255, 180, 84, 0.38);
+  background: rgba(255, 180, 84, 0.07);
+}
+
 .integration-card strong,
 .agent-step strong,
 .source-card strong,

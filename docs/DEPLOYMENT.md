@@ -85,9 +85,9 @@ The Electron build includes `dist-backend/` as a backend resource. macOS can be 
 The release workflow builds native installers on GitHub-hosted runners when a version tag is pushed:
 
 ```bash
-git tag v1.0.1
+git tag v1.0.2
 git push origin main
-git push origin v1.0.1
+git push origin v1.0.2
 ```
 
 The public release receives macOS DMG/ZIP, Windows NSIS installer, and Linux AppImage assets.
