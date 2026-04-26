@@ -7,12 +7,12 @@ CivAgent is now a desktop-first connected agent product with a separate public w
 - `/` serves the CivAgent Desktop product website.
 - `/app` serves the operating workspace used by the Electron app.
 - `desktop/main.js` starts the Python backend, waits for `/api/health`, loads `/app`, and stops the backend when the app exits.
-- `server.py` serves static files, config APIs, real-agent APIs, SQLite evidence, audit events, and Supabase sync.
+- `server.py` serves static files, `.env` readiness APIs, real-agent APIs, SQLite evidence, audit events, and Supabase sync.
 
 ## Agent Flow
 
-1. User opens CivAgent Desktop and saves required integration settings.
-2. Backend stores settings in the desktop config path supplied by Electron.
+1. User creates `.env` from `.env.example` and fills every required provider value.
+2. User opens CivAgent Desktop; Electron starts the backend and the backend reads `.env`.
 3. User submits an organization profile and required website.
 4. Backend validates readiness for Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B.
 5. Tavily performs live company and market research.
@@ -35,7 +35,7 @@ Local SQLite tables:
 - `approvals`: human approval policies.
 - `audit_events`: append-only system activity.
 
-Desktop config is stored outside the repository through `CIVAGENT_CONFIG`. The Electron app points this to the operating system user-data directory.
+Runtime provider configuration is `.env`-only. The app shows masked readiness, but it does not collect or save provider secrets in the UI.
 
 ## External Integrations
 
@@ -48,4 +48,4 @@ Desktop config is stored outside the repository through `CIVAGENT_CONFIG`. The E
 
 ## Why This Shape
 
-The product can be evaluated as installable software while keeping the public website clean. Company users operate inside the desktop app, secrets stay local to the app/backend boundary, and completed runs require live tools, generated artifacts, cloud evidence, and local auditability.
+The product can be evaluated as installable software while keeping the public website clean. Company users operate inside the desktop command workspace, provider values stay in `.env` or backend environment variables, and completed runs require live tools, generated artifacts, cloud evidence, and local auditability.

@@ -6,7 +6,7 @@
 
 ### Company-grade organization intelligence software for deploying AI agents into real operations.
 
-[![Release](https://img.shields.io/badge/release-v1.0.0-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.0)
+[![Release](https://img.shields.io/badge/release-v1.0.1-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.1)
 [![Desktop](https://img.shields.io/badge/app-Electron%20Desktop-ffb454?style=for-the-badge)](#-download)
 [![Model](https://img.shields.io/badge/model-Gemini-ddeed3?style=for-the-badge)](#-required-stack)
 [![Sync](https://img.shields.io/badge/sync-Supabase%20Required-111111?style=for-the-badge)](#-required-stack)
@@ -21,14 +21,14 @@
 
 ## ⚡ Download
 
-Install CivAgent Desktop from the public [`v1.0.0` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.0).
+Install CivAgent Desktop from the public [`v1.0.1` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.1).
 
 | Platform | Download |
 | --- | --- |
-| macOS | [`CivAgent-Desktop-1.0.0-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.dmg) |
-| macOS ZIP | [`CivAgent-Desktop-1.0.0-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.zip) |
-| Windows | [`CivAgent-Desktop-1.0.0-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-win-x64.exe) |
-| Linux | [`CivAgent-Desktop-1.0.0-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-linux-x86_64.AppImage) |
+| macOS | [`CivAgent-Desktop-1.0.1-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-mac-arm64.dmg) |
+| macOS ZIP | [`CivAgent-Desktop-1.0.1-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-mac-arm64.zip) |
+| Windows | [`CivAgent-Desktop-1.0.1-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-win-x64.exe) |
+| Linux | [`CivAgent-Desktop-1.0.1-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.1/CivAgent-Desktop-1.0.1-linux-x86_64.AppImage) |
 
 > macOS builds are unsigned until Apple Developer signing credentials are added, so macOS may show a first-open security warning.
 
@@ -65,7 +65,7 @@ CivAgent turns an organization or market target into a deployable AI-agent opera
 | Surface | Role |
 | --- | --- |
 | Website | Static product site at `/` with positioning, architecture, security notes, and download links |
-| Desktop app | Electron software that starts the local backend and opens the real workspace at `/app` |
+| Desktop app | Electron software with a fixed command workspace, sidebar navigation, run tools, evidence panels, exports, and audit logs |
 | Backend sidecar | Python service for readiness, provider calls, local evidence, exports, and Supabase sync |
 
 The website is the front door. The desktop app is the product.
@@ -83,7 +83,7 @@ CivAgent is intentionally strict: a run is not completed unless every required p
 | E2B | Sandboxed ROI, workflow, and risk analysis |
 | Supabase | Cloud evidence sync for runs, artifacts, sources, tool calls, approvals, and audit events |
 
-Configure these inside the desktop Integrations screen or through environment variables:
+Create `.env` from `.env.example`, fill every required value, then restart CivAgent:
 
 ```env
 AI_PROVIDER=gemini
@@ -98,6 +98,8 @@ SUPABASE_PUBLISHABLE_KEY=...
 SUPABASE_SECRET_KEY=...
 ```
 
+For development, keep `.env` in the repository root. For the packaged desktop app, use the app data `.env` path shown inside the workspace readiness panel, for example `~/Library/Application Support/civagent/.env` on macOS.
+
 ## 🛠️ Quick Start
 
 ```bash
@@ -105,6 +107,8 @@ cd "/Users/aman_shh/Documents/New project 2"
 npm install
 npm run setup:python
 npm run brand:icons
+cp .env.example .env
+# edit .env with Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B values
 npm run check
 npm run desktop:dev
 ```
@@ -135,8 +139,8 @@ npm run desktop:dist
 Electron Desktop
   -> starts Python backend on 127.0.0.1
   -> waits for /api/health
-  -> opens /app workspace
-  -> saves masked integration settings locally
+  -> opens /app command workspace
+  -> reads required provider values from .env or backend environment
   -> runs Gemini + Tavily + Firecrawl + Composio + E2B
   -> syncs evidence to Supabase
   -> stores local SQLite audit backup
@@ -185,8 +189,7 @@ flowchart LR
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /api/health` | Service health and integration readiness |
-| `GET /api/config/status` | Masked desktop config status |
-| `POST /api/config` | Save local integration settings |
+| `GET /api/config/status` | Masked `.env` readiness status |
 | `POST /api/agent/runs` | Execute a connected agent run |
 | `GET /api/agent/runs` | List saved runs |
 | `GET /api/agent/runs/:id/export` | Export JSON and markdown |
@@ -195,8 +198,8 @@ flowchart LR
 ## ✅ Demo Checklist
 
 - Product website opens at `/`.
-- Desktop workspace opens at `/app`.
-- Missing integrations lock the Run button and return `503`.
+- Desktop command workspace opens at `/app`.
+- Missing `.env` integrations lock the Run button and return `503`.
 - Connected runs show Gemini, Tavily, Firecrawl, Composio, E2B, and Supabase evidence.
 - Exports include provider status, sources, tool-call evidence, sandbox analysis, and artifacts.
 - `npm run check` passes before release.

@@ -214,8 +214,8 @@ flowchart LR
   classDef output fill:#241515,stroke:#ff9f8a,color:#f7f3e8,stroke-width:1px
 
   A["Electron Desktop"]:::desktop --> B["Python Backend Sidecar"]:::desktop
-  B --> C["/app Workspace"]:::desktop
-  C --> D["/api/config Status + Save"]:::desktop
+  B --> C["/app Command Workspace"]:::desktop
+  C --> D[".env Readiness Status"]:::desktop
   C --> E["/api/agent/runs"]:::desktop
   E --> F{"Strict Readiness Gate"}:::gate
   F --> G["Tavily Live Research"]:::tool

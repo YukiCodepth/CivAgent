@@ -29,28 +29,32 @@ from urllib.request import Request, urlopen
 
 APP_ROOT = Path(__file__).resolve().parent
 STATIC_ROOT = Path(os.environ.get("CIVAGENT_STATIC_ROOT", APP_ROOT)).resolve()
+ENV_PATH = Path(os.environ.get("CIVAGENT_ENV", APP_ROOT / ".env")).expanduser()
 
 
 def load_env_file() -> None:
-    env_path = APP_ROOT / ".env"
-    if not env_path.exists():
-        return
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    candidates = []
+    for candidate in (ENV_PATH, APP_ROOT / ".env", STATIC_ROOT / ".env"):
+        if candidate not in candidates:
+            candidates.append(candidate)
+    for env_path in candidates:
+        if not env_path.exists():
             continue
-        key, value = line.split("=", 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = value
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
 
 
 load_env_file()
 
 DATA_DIR = APP_ROOT / "data"
 DB_PATH = Path(os.environ.get("CIVAGENT_DB", DATA_DIR / "civagent.sqlite"))
-CONFIG_PATH = Path(os.environ.get("CIVAGENT_CONFIG", DATA_DIR / "civagent-desktop-config.json"))
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8080"))
 
@@ -77,25 +81,6 @@ SECRET_FIELDS = {
 }
 
 
-def load_config_file() -> dict:
-    if not CONFIG_PATH.exists():
-        return {}
-    try:
-        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-    if not isinstance(data, dict):
-        return {}
-    return {
-        key: str(data.get(key, "")).strip()
-        for key in CONFIG_FIELDS
-        if str(data.get(key, "")).strip()
-    }
-
-
-RUNTIME_CONFIG = load_config_file()
-
-
 def config_value(key: str, default: str = "") -> str:
     env_value = os.environ.get(key)
     if env_value:
@@ -104,7 +89,7 @@ def config_value(key: str, default: str = "") -> str:
         google_key = os.environ.get("GOOGLE_API_KEY", "")
         if google_key:
             return google_key.strip()
-    return str(RUNTIME_CONFIG.get(key, default)).strip()
+    return str(default).strip()
 
 
 def ai_provider_raw() -> str:
@@ -140,44 +125,15 @@ def config_status() -> dict:
         values[key] = {
             "configured": is_configured(value),
             "masked": mask_config_value(value, reveal=False) if key in SECRET_FIELDS or key == "SUPABASE_URL" else value,
-            "source": "environment" if os.environ.get(key) else "desktop-config" if RUNTIME_CONFIG.get(key) else "missing",
+            "source": "environment" if os.environ.get(key) or (key == "GEMINI_API_KEY" and os.environ.get("GOOGLE_API_KEY")) else "missing",
             "secret": key in SECRET_FIELDS,
         }
     return {
-        "configPath": str(CONFIG_PATH),
+        "envPath": str(ENV_PATH),
         "provider": ai_provider(),
         "values": values,
         "integrations": integration_status(),
     }
-
-
-def save_config_updates(payload: dict) -> dict:
-    global RUNTIME_CONFIG
-    current = load_config_file()
-    updates = payload.get("config", payload) if isinstance(payload, dict) else {}
-    if not isinstance(updates, dict):
-        raise ValueError("Config payload must be an object.")
-    for key in CONFIG_FIELDS:
-        if key not in updates:
-            continue
-        value = str(updates.get(key, "")).strip()
-        if not value or value in {"********", "••••••••"} or value.startswith("****"):
-            continue
-        if key == "AI_PROVIDER":
-            value = value.lower()
-            if value != "gemini":
-                raise ValueError("AI_PROVIDER must be gemini.")
-        current[key] = value
-    if current:
-        current["AI_PROVIDER"] = "gemini"
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps(current, indent=2), encoding="utf-8")
-    try:
-        CONFIG_PATH.chmod(0o600)
-    except OSError:
-        pass
-    RUNTIME_CONFIG = load_config_file()
-    return config_status()
 
 MARKETS = {
     "Enterprise SaaS",
@@ -1523,35 +1479,10 @@ class CivAgentHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/config":
-            try:
-                status = save_config_updates(self.read_json())
-                with db() as conn:
-                    write_audit(
-                        conn,
-                        "config.updated",
-                        None,
-                        {
-                            "configured": [
-                                key
-                                for key, item in status["values"].items()
-                                if item.get("configured")
-                            ],
-                            "configPath": status["configPath"],
-                        },
-                    )
-                self.json_response(
-                    HTTPStatus.OK,
-                    {
-                        "config": status,
-                        "integrations": integration_status(),
-                        "audit": audit_events(10),
-                        "mode": "server",
-                    },
-                )
-            except (ValueError, json.JSONDecodeError) as exc:
-                self.error_json(HTTPStatus.BAD_REQUEST, str(exc))
-            except OSError as exc:
-                self.error_json(HTTPStatus.INTERNAL_SERVER_ERROR, f"Could not save desktop config: {exc}")
+            self.error_json(
+                HTTPStatus.METHOD_NOT_ALLOWED,
+                "CivAgent configuration is .env-only. Add required provider values to .env and restart the app.",
+            )
             return
         if parsed.path == "/api/agent/runs":
             profile = None

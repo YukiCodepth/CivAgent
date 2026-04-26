@@ -54,7 +54,7 @@ function startBackend(port) {
     HOST: "127.0.0.1",
     PORT: String(port),
     CIVAGENT_STATIC_ROOT: app.isPackaged ? path.join(process.resourcesPath, "web") : projectRoot(),
-    CIVAGENT_CONFIG: userDataPath("civagent-desktop-config.json"),
+    CIVAGENT_ENV: userDataPath(".env"),
     CIVAGENT_DB: path.join(dataDir, "civagent.sqlite")
   };
   const { command, args, cwd } = backendCommand();

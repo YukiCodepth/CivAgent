@@ -33,9 +33,9 @@ PORT=8081 npm start
 
 ## Configuration
 
-Desktop mode stores provider settings in the app user-data directory through `CIVAGENT_CONFIG`.
+Desktop and server mode both read provider values from `.env` or backend environment variables. Do not paste secrets into the app UI.
 
-Server mode can use `.env`:
+Development reads `.env` from the repository root. Packaged desktop builds read the app data `.env` path exposed by `/api/config/status` and shown in the workspace readiness panel, such as `~/Library/Application Support/civagent/.env` on macOS.
 
 ```bash
 HOST=127.0.0.1
@@ -85,16 +85,16 @@ The Electron build includes `dist-backend/` as a backend resource. macOS can be 
 The release workflow builds native installers on GitHub-hosted runners when a version tag is pushed:
 
 ```bash
-git tag v1.0.0
+git tag v1.0.1
 git push origin main
-git push origin v1.0.0
+git push origin v1.0.1
 ```
 
 The public release receives macOS DMG/ZIP, Windows NSIS installer, and Linux AppImage assets.
 
 ## Supabase
 
-Create the tables listed in `README.md`, then configure Supabase in the desktop Integrations panel or server `.env`. The backend writes:
+Create the tables listed in `README.md`, then configure Supabase in `.env`. The backend writes:
 
 - `agent_runs`
 - `agent_artifacts`
@@ -117,4 +117,4 @@ docker run --rm -p 8080:8080 --env-file .env -v "$PWD/data:/app/data" civagent
 - Set `HOST=0.0.0.0` inside containers.
 - Mount `data/` on persistent storage or rely on Supabase as the system of record.
 - Add authentication before exposing the server workspace beyond an internal evaluation environment.
-- Keep Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B keys in the desktop settings store or backend environment only.
+- Keep Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B values in `.env` or backend environment variables only.

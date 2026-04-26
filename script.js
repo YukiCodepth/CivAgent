@@ -20,9 +20,7 @@ const agentTimeline = document.getElementById("agentTimeline");
 const sourceList = document.getElementById("sourceList");
 const toolList = document.getElementById("toolList");
 const approvalList = document.getElementById("approvalList");
-const configForm = document.getElementById("configForm");
 const configNotice = document.getElementById("configNotice");
-const saveConfigButton = document.getElementById("saveConfigButton");
 
 const storageKey = "civagent.workspace.v1";
 const defaultProfile = {
@@ -97,11 +95,13 @@ function setWorkspaceMode(mode) {
     mode === "agent"
       ? "Real agent workspace"
       : mode === "server"
-        ? "Server connected - required integrations missing"
-        : "Server unavailable - integrations locked";
+        ? "Server connected - .env required"
+        : "Server unavailable - agent locked";
   workspaceStatus.innerHTML = "<span></span>";
   workspaceStatus.append(` ${label}`);
-  auditMode.textContent = mode === "agent" ? "Real agent audit enabled" : mode === "server" ? "Server audit enabled" : "Local activity only";
+  if (auditMode) {
+    auditMode.textContent = mode === "agent" ? "Real agent audit enabled" : mode === "server" ? "Server audit enabled" : "Local activity only";
+  }
 }
 
 function getProfileFromForm() {
@@ -328,7 +328,7 @@ function renderRuns() {
     label.textContent = "No saved runs yet";
     title.textContent = agentAvailable
       ? "Run the organization agent to create your first evidence record."
-      : "Connect every required integration to unlock real agent runs.";
+      : "Complete every required .env value to unlock real agent runs.";
     content.append(label, title);
     empty.append(content);
     runList.append(empty);
@@ -373,7 +373,7 @@ function renderAudit() {
     const body = document.createElement("p");
     label.textContent = "No events";
     title.textContent = "Audit log is ready";
-    body.textContent = "Simulation events will appear here when the product API records activity.";
+    body.textContent = "Run events will appear here when the product API records activity.";
     empty.append(label, title, body);
     auditList.append(empty);
     return;
@@ -442,29 +442,18 @@ function renderIntegrations() {
 
 function renderConfigStatus(config) {
   configState = config || configState;
-  if (!configForm || !configState?.values) return;
-
-  Object.entries(configState.values).forEach(([key, item]) => {
-    const field = configForm.elements[key];
-    if (!field) return;
-    if (key === "AI_PROVIDER") {
-      field.value = "gemini";
-      return;
-    }
-    if (key === "GEMINI_MODEL" && item.configured && !field.value) {
-      field.value = item.masked || "gemini-3-flash-preview";
-      return;
-    }
-    if (item.configured) {
-      field.placeholder = `Saved: ${item.masked || "configured"}`;
-    }
-  });
+  if (!configNotice || !configState?.values) return;
 
   const configuredCount = Object.values(configState.values).filter(item => item.configured).length;
   const totalCount = Object.keys(configState.values).length;
-  if (configNotice) {
-    configNotice.textContent = `${configuredCount}/${totalCount} desktop settings configured. Stored in local app data.`;
-  }
+  const missing = Object.entries(configState.values)
+    .filter(([, item]) => !item.configured)
+    .map(([key]) => key)
+    .join(", ");
+  const envPath = configState.envPath ? ` Env path: ${configState.envPath}.` : "";
+  configNotice.textContent = missing
+    ? `${configuredCount}/${totalCount} .env values detected. Missing: ${missing}.${envPath}`
+    : `${configuredCount}/${totalCount} .env values detected. Required stack ready.${envPath}`;
 }
 
 function renderAgentNotice(message) {
@@ -477,16 +466,16 @@ function renderAgentNotice(message) {
     agentNotice.textContent = "Real agent is ready: Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B are configured.";
   } else if (serverMode) {
     const missing = missingRequiredStatuses();
-    agentNotice.textContent = `Real agent is locked. Missing: ${missing.join("; ") || "required integrations"}.`;
+    agentNotice.textContent = `Real agent is locked. Add missing values to .env and restart: ${missing.join("; ") || "required integrations"}.`;
   } else {
-    agentNotice.textContent = "Product API is unavailable. Real agent runs require the server and every integration key.";
+    agentNotice.textContent = "Product API is unavailable. Start the desktop backend with a complete .env file.";
   }
   if (runAgentButton) {
     runAgentButton.disabled = serverMode && !agentAvailable;
     runAgentButton.textContent = serverMode
       ? agentAvailable
         ? "Run organization agent"
-        : "Connect keys to run agent"
+        : "Complete .env to run"
       : "Server required";
   }
 }
@@ -504,7 +493,7 @@ function renderAgentTimeline(run) {
       ]
     : [
         ["01", "Configuration preview", "Waiting for required integrations before live research starts."],
-        ["02", "Required stack", "Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B must all be connected."],
+        ["02", ".env readiness", "Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B must all be present in .env or the backend environment."],
         ["03", "No local completion", "CivAgent only completes runs after every required provider succeeds."]
       ];
 
@@ -618,7 +607,7 @@ async function runSimulation(event) {
   const profile = getProfileFromForm();
   if (serverMode) {
     if (!agentAvailable) {
-      renderAgentNotice(`Real agent is not configured yet. Missing: ${missingRequiredStatuses().join("; ") || "required integrations"}.`);
+      renderAgentNotice(`Real agent is not configured yet. Add these to .env and restart: ${missingRequiredStatuses().join("; ") || "required integrations"}.`);
       return;
     }
     runAgentButton.disabled = true;
@@ -640,58 +629,17 @@ async function runSimulation(event) {
       renderAll(activeRun);
       return;
     } catch (error) {
-      renderAgentNotice(error.message || "Real agent run failed. Check your API keys and server logs.");
+      renderAgentNotice(error.message || "Real agent run failed. Check your .env values and server logs.");
       console.warn(error);
       renderAll(activeRun);
       return;
     } finally {
       runAgentButton.disabled = serverMode && !agentAvailable;
-      runAgentButton.textContent = agentAvailable ? "Run organization agent" : "Connect keys to run agent";
+      runAgentButton.textContent = agentAvailable ? "Run organization agent" : "Complete .env to run";
     }
   }
 
-  renderAgentNotice("Server is required. Start the CivAgent API and connect every integration before running the agent.");
-}
-
-async function saveDesktopConfig(event) {
-  event.preventDefault();
-  if (!configForm) return;
-  const formData = new FormData(configForm);
-  const config = {};
-  for (const [key, rawValue] of formData.entries()) {
-    const value = rawValue.toString().trim();
-    if (key === "AI_PROVIDER") {
-      config[key] = "gemini";
-    } else if (value) {
-      config[key] = value;
-    }
-  }
-  saveConfigButton.disabled = true;
-  saveConfigButton.textContent = "Saving...";
-  try {
-    const data = await apiRequest("/api/config", {
-      method: "POST",
-      body: JSON.stringify({ config })
-    });
-    configState = data.config || configState;
-    integrationState = data.integrations || integrationState;
-    auditEvents = data.audit || auditEvents;
-    agentAvailable = Boolean(integrationState?.agentAvailable);
-    [...configForm.elements].forEach(field => {
-      if (field.type === "password") field.value = "";
-    });
-    renderConfigStatus(configState);
-    setWorkspaceMode(agentAvailable ? "agent" : "server");
-    renderIntegrations();
-    renderAgentNotice("Desktop integrations saved. CivAgent refreshed the required readiness gate.");
-    renderAudit();
-  } catch (error) {
-    renderAgentNotice(error.message || "Could not save desktop integrations.");
-    console.warn(error);
-  } finally {
-    saveConfigButton.disabled = false;
-    saveConfigButton.textContent = "Save desktop integrations";
-  }
+  renderAgentNotice("Server is required. Start the CivAgent API with a complete .env file before running the agent.");
 }
 
 function exportActiveRun() {
@@ -742,7 +690,7 @@ async function clearRuns() {
 function resetWorkspace() {
   setForm(defaultProfile);
   if (serverMode) {
-    renderAgentNotice("Profile reset. Run the real organization agent after your keys are configured.");
+    renderAgentNotice("Profile reset. Run the real organization agent after your .env values are configured.");
     return;
   }
   renderAgentNotice("Profile reset. Start the CivAgent API before running the organization agent.");
@@ -875,7 +823,6 @@ form.addEventListener("input", syncRangeOutputs);
 exportRunButton.addEventListener("click", exportActiveRun);
 clearRunsButton.addEventListener("click", clearRuns);
 resetWorkspaceButton.addEventListener("click", resetWorkspace);
-if (configForm) configForm.addEventListener("submit", saveDesktopConfig);
 
 resize();
 boot();
