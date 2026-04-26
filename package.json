@@ -57,6 +57,7 @@
     "directories": {
       "output": "release"
     },
+    "artifactName": "CivAgent-Desktop-${version}-${os}-${arch}.${ext}",
     "mac": {
       "icon": "build/icon.icns",
       "target": [

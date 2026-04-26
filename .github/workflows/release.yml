@@ -20,7 +20,7 @@ jobs:
             os: macos-latest
             files: |
               release/*.dmg
-              release/*-mac.zip
+              release/*.zip
               release/*.blockmap
               release/latest-mac.yml
           - name: Windows
@@ -86,9 +86,9 @@ jobs:
             Installable organization intelligence software for companies designing governed AI-agent operating models.
 
             ## Assets
-            - macOS: DMG and ZIP
-            - Windows: NSIS installer
-            - Linux: AppImage
+            - macOS: `CivAgent-Desktop-1.0.0-mac-arm64.dmg` and `CivAgent-Desktop-1.0.0-mac-arm64.zip`
+            - Windows: `CivAgent-Desktop-1.0.0-win-x64.exe`
+            - Linux: `CivAgent-Desktop-1.0.0-linux-x64.AppImage`
 
             ## Runtime
             CivAgent Desktop starts a local Python backend, opens the `/app` workspace, requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B, then syncs completed run evidence to Supabase.
