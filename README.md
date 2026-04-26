@@ -32,6 +32,21 @@ Install CivAgent Desktop from the public [`v1.0.0` release](https://github.com/Y
 
 > macOS builds are unsigned until Apple Developer signing credentials are added, so macOS may show a first-open security warning.
 
+If macOS says **"CivAgent Desktop is damaged and can't be opened"**, remove the download quarantine flag:
+
+```bash
+xattr -cr "/Applications/CivAgent Desktop.app"
+open "/Applications/CivAgent Desktop.app"
+```
+
+If you have not moved the app into Applications yet:
+
+```bash
+cp -R "/Volumes/CivAgent Desktop/CivAgent Desktop.app" "/Applications/"
+xattr -cr "/Applications/CivAgent Desktop.app"
+open "/Applications/CivAgent Desktop.app"
+```
+
 ## 🧭 What It Does
 
 CivAgent turns an organization or market target into a deployable AI-agent operating plan.
