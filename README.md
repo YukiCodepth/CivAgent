@@ -1,99 +1,89 @@
 <div align="center">
 
-<img src="assets/brand/civagent-wordmark.svg" alt="CivAgent Desktop" width="420" />
+<img src="assets/brand/civagent-wordmark.svg" alt="CivAgent Desktop" width="430" />
 
 # CivAgent Desktop
 
-### Installable organization intelligence software for companies deploying AI agents into real operations.
+### Company-grade organization intelligence software for deploying AI agents into real operations.
 
-[![Desktop](https://img.shields.io/badge/app-Electron%20Desktop-72e0c4?style=for-the-badge)](#quick-start)
-[![Backend](https://img.shields.io/badge/backend-Python%20Sidecar-ffb454?style=for-the-badge)](#architecture)
-[![Model](https://img.shields.io/badge/model-Gemini-ddeed3?style=for-the-badge)](#required-stack)
-[![Evidence](https://img.shields.io/badge/evidence-Supabase%20%2B%20SQLite-111111?style=for-the-badge)](#supabase-schema)
+[![Release](https://img.shields.io/badge/release-v1.0.0-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.0)
+[![Desktop](https://img.shields.io/badge/app-Electron%20Desktop-ffb454?style=for-the-badge)](#-download)
+[![Model](https://img.shields.io/badge/model-Gemini-ddeed3?style=for-the-badge)](#-required-stack)
+[![Sync](https://img.shields.io/badge/sync-Supabase%20Required-111111?style=for-the-badge)](#-required-stack)
 
-**CivAgent Desktop researches a company, verifies live evidence, maps deployable agent teams, runs sandbox analysis, synchronizes proof to Supabase, and exports company-grade operating artifacts.**
+**CivAgent researches a company, verifies live evidence, designs an agent operating model, runs sandbox analysis, syncs proof to Supabase, and exports board-ready artifacts.**
 
-[Quick Start](#quick-start) · [Workflow](#workflow) · [Interactive Diagram](docs/workflow-diagram.html) · [Architecture](docs/ARCHITECTURE.md) · [Deployment](docs/DEPLOYMENT.md) · [Security](docs/SECURITY.md)
+[Download](#-download) · [Quick Start](#-quick-start) · [Workflow](#-workflow) · [Docs](#-docs)
 
 </div>
 
 ---
 
-## Download v1.0.0
+## ⚡ Download
 
-The public desktop installers are published from the [`v1.0.0` GitHub Release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.0) after the release workflow completes.
+Install CivAgent Desktop from the public [`v1.0.0` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.0).
 
-| Platform | Installer |
+| Platform | Download |
 | --- | --- |
 | macOS | [`CivAgent-Desktop-1.0.0-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.dmg) |
 | macOS ZIP | [`CivAgent-Desktop-1.0.0-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.zip) |
 | Windows | [`CivAgent-Desktop-1.0.0-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-win-x64.exe) |
 | Linux | [`CivAgent-Desktop-1.0.0-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-linux-x86_64.AppImage) |
 
-The app starts a local backend, opens the `/app` workspace, stores integration settings locally with masked readiness, and requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B before a real run can complete.
+> macOS builds are unsigned until Apple Developer signing credentials are added, so macOS may show a first-open security warning.
 
-## What CivAgent Does
+## 🧭 What It Does
 
-CivAgent is split into two surfaces:
+CivAgent turns an organization or market target into a deployable AI-agent operating plan.
+
+| Output | Purpose |
+| --- | --- |
+| Company intelligence brief | Live evidence, market context, and source URLs |
+| Agent team map | Role-by-role agent operating model |
+| Workflow blueprint | Automations, tool access, and approval gates |
+| Risk register | Governance, compliance, and failure-mode planning |
+| Venture memo | Pricing, moat, GTM, and scale strategy |
+| Export bundle | JSON plus markdown report for sharing |
+
+## 🖥️ Product Surfaces
 
 | Surface | Role |
 | --- | --- |
-| **Product website** | Public website at `/` for positioning, architecture, security, stack, and app launch/download guidance. |
-| **Desktop software** | Electron app that starts a local Python backend, opens `/app`, stores masked integration settings locally, and runs the real agent workflow. |
+| Website | Static product site at `/` with positioning, architecture, security notes, and download links |
+| Desktop app | Electron software that starts the local backend and opens the real workspace at `/app` |
+| Backend sidecar | Python service for readiness, provider calls, local evidence, exports, and Supabase sync |
 
-Every completed run requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B to be configured and successful. Supabase sync must complete before CivAgent marks a run as completed.
+The website is the front door. The desktop app is the product.
 
-## Architecture
+## 🔐 Required Stack
 
-```text
-Electron Desktop
-  -> starts Python backend sidecar on 127.0.0.1
-  -> opens /app workspace after /api/health succeeds
-  -> desktop settings save required integrations locally
-  -> /api/agent/runs coordinates external tools
-  -> Gemini generates company operating artifacts
-  -> Supabase sync completes before local SQLite evidence is saved
-```
+CivAgent is intentionally strict: a run is not completed unless every required provider is configured and succeeds.
 
-Core runtime:
-
-| Component | Role |
+| Provider | Job |
 | --- | --- |
-| `index.html` | Public product website for CivAgent Desktop. |
-| `app.html` / `script.js` | Desktop workspace, integration settings, traces, sources, approvals, reports, and exports. |
-| `desktop/main.js` | Electron shell that owns backend startup, health wait, app window, and shutdown. |
-| `server.py` | Static server, config API, real-agent orchestration, provider calls, Supabase sync, SQLite evidence, and audit logging. |
-| `docs/workflow-diagram.html` | Movable, zoomable architecture walkthrough. |
+| Gemini | Reasoning and artifact generation |
+| Tavily | Live company and market research |
+| Firecrawl | Required website extraction |
+| Composio | SaaS/action toolkit graph |
+| E2B | Sandboxed ROI, workflow, and risk analysis |
+| Supabase | Cloud evidence sync for runs, artifacts, sources, tool calls, approvals, and audit events |
 
-## Required Stack
-
-Desktop users can save these values in the app Integrations panel. Server deployments can copy `.env.example` to `.env`.
+Configure these inside the desktop Integrations screen or through environment variables:
 
 ```env
 AI_PROVIDER=gemini
 GEMINI_API_KEY=...
 GEMINI_MODEL=gemini-3-flash-preview
 TAVILY_API_KEY=...
-
-SUPABASE_URL=...
-SUPABASE_PUBLISHABLE_KEY=...
-SUPABASE_SECRET_KEY=...
-
 FIRECRAWL_API_KEY=...
 COMPOSIO_API_KEY=...
 E2B_API_KEY=...
+SUPABASE_URL=...
+SUPABASE_PUBLISHABLE_KEY=...
+SUPABASE_SECRET_KEY=...
 ```
 
-| Required System | Purpose |
-| --- | --- |
-| Gemini | Organization intelligence and artifact generation |
-| Tavily | Live market and company research |
-| Firecrawl | Required website extraction |
-| Composio | SaaS/action toolkit graph |
-| E2B | Sandboxed ROI, workflow, and risk analysis |
-| Supabase | Cloud evidence store for runs, artifacts, sources, tool calls, and approvals |
-
-## Quick Start
+## 🛠️ Quick Start
 
 ```bash
 cd "/Users/aman_shh/Documents/New project 2"
@@ -117,24 +107,39 @@ http://localhost:8080
 http://localhost:8080/app
 ```
 
-Desktop distribution:
+Build desktop packages:
 
 ```bash
 npm run backend:build
 npm run desktop:dist
 ```
 
-Publish a tri-platform public release by pushing a version tag:
+## 🧩 Architecture
 
-```bash
-git tag v1.0.0
-git push origin main
-git push origin v1.0.0
+```text
+Electron Desktop
+  -> starts Python backend on 127.0.0.1
+  -> waits for /api/health
+  -> opens /app workspace
+  -> saves masked integration settings locally
+  -> runs Gemini + Tavily + Firecrawl + Composio + E2B
+  -> syncs evidence to Supabase
+  -> stores local SQLite audit backup
+  -> exports markdown and JSON artifacts
 ```
 
-## Workflow
+Core files:
 
-The README diagram is GitHub-safe Mermaid. For a zoomable and movable version, open [`docs/workflow-diagram.html`](docs/workflow-diagram.html).
+| File | Role |
+| --- | --- |
+| `index.html` | Public product website |
+| `app.html` / `script.js` | Desktop workspace experience |
+| `server.py` | Backend API, provider orchestration, sync, exports, audit logs |
+| `desktop/main.js` | Electron shell and backend lifecycle |
+
+## 🔄 Workflow
+
+The README diagram is GitHub-safe Mermaid. For a zoomable version, open [`docs/workflow-diagram.html`](docs/workflow-diagram.html).
 
 ```mermaid
 flowchart LR
@@ -145,110 +150,53 @@ flowchart LR
   classDef store fill:#142018,stroke:#ddeed3,color:#f7f3e8,stroke-width:1px
   classDef output fill:#241515,stroke:#ff9f8a,color:#f7f3e8,stroke-width:1px
 
-  A["Electron Desktop"]:::desktop --> B["Python Backend Sidecar"]:::desktop
-  B --> C["/app Workspace"]:::desktop
-  C --> D["/api/config Status + Save"]:::desktop
-  C --> E["/api/agent/runs"]:::desktop
-  E --> F{"Strict Readiness Gate"}:::gate
-  F --> G["Tavily Live Research"]:::tool
-  F --> H["Firecrawl Website Extraction"]:::tool
-  F --> I["Composio Tool Graph"]:::tool
-  F --> J["E2B Sandboxed Analysis"]:::tool
-  G --> K["Evidence Bundle"]:::store
-  H --> K
-  I --> K
-  J --> K
-  K --> L["Gemini Organization Intelligence"]:::model
-  L --> M["Operating Artifacts"]:::output
-  M --> N["Supabase Evidence Sync"]:::store
-  N --> O["SQLite Local Record"]:::store
-  O --> P["Desktop Report + Export"]:::output
-  F -. missing key or provider failure .-> Q["agent_run.failed Audit Event"]:::output
+  A["Desktop Workspace"]:::desktop --> B["Strict Readiness Gate"]:::gate
+  B --> C["Tavily Research"]:::tool
+  B --> D["Firecrawl Extraction"]:::tool
+  B --> E["Composio Tool Graph"]:::tool
+  B --> F["E2B Sandbox Analysis"]:::tool
+  C --> G["Evidence Bundle"]:::store
+  D --> G
+  E --> G
+  F --> G
+  G --> H["Gemini Operating Model"]:::model
+  H --> I["Artifacts + Report"]:::output
+  I --> J["Supabase Sync"]:::store
+  J --> K["Export + Audit Trail"]:::output
 ```
 
-## API
+## 📡 API Snapshot
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/health` | Service health and required integration status |
-| `GET` | `/api/bootstrap` | Latest profile, saved runs, audit events, config readiness, and integration readiness |
-| `GET` | `/api/config/status` | Masked desktop integration settings and readiness |
-| `POST` | `/api/config` | Save local desktop integration settings |
-| `GET` | `/api/integrations` | Full readiness gate details |
-| `POST` | `/api/agent/runs` | Execute the fully connected organization intelligence run |
-| `GET` | `/api/agent/runs` | List saved real-agent runs |
-| `GET` | `/api/agent/runs/:id/export` | Export run JSON and markdown report |
-| `GET` | `/api/audit` | Audit event history |
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Service health and integration readiness |
+| `GET /api/config/status` | Masked desktop config status |
+| `POST /api/config` | Save local integration settings |
+| `POST /api/agent/runs` | Execute a connected agent run |
+| `GET /api/agent/runs` | List saved runs |
+| `GET /api/agent/runs/:id/export` | Export JSON and markdown |
+| `GET /api/audit` | Audit history |
 
-## Supabase Schema
+## ✅ Demo Checklist
 
-Create these tables in the Supabase SQL editor before running the connected workflow.
-
-```sql
-create table if not exists agent_runs (
-  id text primary key,
-  workspace_id text not null,
-  created_at timestamptz not null,
-  status text not null,
-  model text not null,
-  integrations jsonb not null,
-  profile jsonb not null,
-  result jsonb not null,
-  markdown_report text not null
-);
-
-create table if not exists agent_artifacts (
-  id text primary key,
-  run_id text not null,
-  created_at timestamptz not null,
-  artifact_type text not null,
-  title text not null,
-  content jsonb not null
-);
-
-create table if not exists agent_sources (
-  id text primary key,
-  run_id text not null,
-  created_at timestamptz not null,
-  provider text not null,
-  title text not null,
-  url text not null,
-  snippet text not null
-);
-
-create table if not exists tool_calls (
-  id text primary key,
-  run_id text not null,
-  created_at timestamptz not null,
-  tool_name text not null,
-  status text not null,
-  input jsonb not null,
-  output jsonb not null
-);
-
-create table if not exists approvals (
-  id text primary key,
-  run_id text not null,
-  created_at timestamptz not null,
-  title text not null,
-  policy text not null,
-  required boolean not null default true
-);
-```
-
-## Demo Checklist
-
-- `npm run check` passes.
 - Product website opens at `/`.
 - Desktop workspace opens at `/app`.
-- Desktop Integrations panel saves masked local settings through `/api/config`.
-- With missing keys, the Run button stays locked and `/api/agent/runs` returns a non-success error.
-- With all keys, Tavily, Firecrawl, Composio, E2B, Gemini, and Supabase evidence appears in the workspace.
-- Electron dev mode launches the backend, loads `/app`, and stops the backend when the window exits.
+- Missing integrations lock the Run button and return `503`.
+- Connected runs show Gemini, Tavily, Firecrawl, Composio, E2B, and Supabase evidence.
+- Exports include provider status, sources, tool-call evidence, sandbox analysis, and artifacts.
+- `npm run check` passes before release.
 
-## Supporting Docs
+## 📚 Docs
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Deployment](docs/DEPLOYMENT.md)
 - [Security](docs/SECURITY.md)
 - [Interactive Workflow Diagram](docs/workflow-diagram.html)
+
+---
+
+<div align="center">
+
+Built as a connected agent product for real company workflows.
+
+</div>
