@@ -113,6 +113,8 @@ npm run check
 npm run desktop:dev
 ```
 
+`npm run desktop:dev` reads the repository `.env` file. The downloaded desktop installer reads the app data `.env` path shown inside CivAgent.
+
 Server-only development:
 
 ```bash

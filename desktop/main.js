@@ -18,6 +18,10 @@ function userDataPath(...parts) {
   return path.join(app.getPath("userData"), ...parts);
 }
 
+function envFilePath() {
+  return app.isPackaged ? userDataPath(".env") : path.join(projectRoot(), ".env");
+}
+
 function findOpenPort() {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
@@ -54,7 +58,7 @@ function startBackend(port) {
     HOST: "127.0.0.1",
     PORT: String(port),
     CIVAGENT_STATIC_ROOT: app.isPackaged ? path.join(process.resourcesPath, "web") : projectRoot(),
-    CIVAGENT_ENV: userDataPath(".env"),
+    CIVAGENT_ENV: envFilePath(),
     CIVAGENT_DB: path.join(dataDir, "civagent.sqlite")
   };
   const { command, args, cwd } = backendCommand();
