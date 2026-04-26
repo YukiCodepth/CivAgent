@@ -1,6 +1,6 @@
 {
   "name": "civagent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "author": "CivAgent",
   "description": "CivAgent Desktop is connected organization intelligence software for designing governed AI-agent operating models.",
@@ -30,6 +30,7 @@
       "server.py",
       "assets/**",
       "docs/**",
+      "supabase/**",
       "desktop/**",
       "package.json"
     ],
@@ -50,7 +51,8 @@
           "styles.css",
           "script.js",
           "assets/**",
-          "docs/**"
+          "docs/**",
+          "supabase/**"
         ]
       }
     ],

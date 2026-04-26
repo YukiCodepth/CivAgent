@@ -313,6 +313,41 @@ def compact_text(value: str, limit: int = 900) -> str:
     return text[:limit]
 
 
+def first_scalar(value, default=None):
+    if isinstance(value, list):
+        for item in value:
+            scalar = first_scalar(item, None)
+            if scalar not in {None, ""}:
+                return scalar
+        return default
+    if isinstance(value, dict):
+        for key in ("value", "score", "count", "number", "label", "text", "title"):
+            if key in value:
+                scalar = first_scalar(value.get(key), None)
+                if scalar not in {None, ""}:
+                    return scalar
+        return default
+    return value if value not in {None, ""} else default
+
+
+def number_value(value, default, minimum, maximum) -> int:
+    scalar = first_scalar(value, default)
+    if isinstance(scalar, str):
+        match = re.search(r"-?\d+(?:\.\d+)?", scalar)
+        scalar = match.group(0) if match else default
+    try:
+        return int(clamp(float(scalar), minimum, maximum))
+    except (TypeError, ValueError):
+        return int(clamp(float(default), minimum, maximum))
+
+
+def text_value(value, default="", limit: int = 900) -> str:
+    scalar = first_scalar(value, default)
+    if isinstance(scalar, (dict, list)):
+        scalar = json.dumps(scalar)
+    return compact_text(scalar or default, limit)
+
+
 def http_json(method: str, url: str, payload: dict | None = None, headers: dict | None = None, timeout: int = 30) -> dict:
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     request_headers = {
@@ -437,16 +472,16 @@ def init_db() -> None:
 
 def normalize_profile(payload: dict) -> dict:
     profile = {**DEFAULT_PROFILE, **(payload or {})}
-    profile["orgName"] = str(profile.get("orgName", "")).strip()[:120] or DEFAULT_PROFILE["orgName"]
-    profile["market"] = profile["market"] if profile.get("market") in MARKETS else DEFAULT_PROFILE["market"]
-    profile["stage"] = profile["stage"] if profile.get("stage") in STAGES else DEFAULT_PROFILE["stage"]
-    profile["autonomy"] = profile["autonomy"] if profile.get("autonomy") in AUTONOMY else DEFAULT_PROFILE["autonomy"]
-    profile["horizon"] = str(profile.get("horizon")) if str(profile.get("horizon")) in HORIZONS else DEFAULT_PROFILE["horizon"]
-    profile["thesis"] = str(profile.get("thesis", "")).strip()[:1800] or DEFAULT_PROFILE["thesis"]
-    profile["website"] = normalize_url(str(profile.get("website", "")).strip()[:240])
-    profile["humans"] = int(clamp(float(profile.get("humans", DEFAULT_PROFILE["humans"])), 2, 120))
-    profile["agentCount"] = int(clamp(float(profile.get("agentCount", DEFAULT_PROFILE["agentCount"])), 4, 250))
-    profile["riskTolerance"] = int(clamp(float(profile.get("riskTolerance", DEFAULT_PROFILE["riskTolerance"])), 10, 90))
+    profile["orgName"] = text_value(profile.get("orgName"), DEFAULT_PROFILE["orgName"], 120) or DEFAULT_PROFILE["orgName"]
+    profile["market"] = first_scalar(profile.get("market")) if first_scalar(profile.get("market")) in MARKETS else DEFAULT_PROFILE["market"]
+    profile["stage"] = first_scalar(profile.get("stage")) if first_scalar(profile.get("stage")) in STAGES else DEFAULT_PROFILE["stage"]
+    profile["autonomy"] = first_scalar(profile.get("autonomy")) if first_scalar(profile.get("autonomy")) in AUTONOMY else DEFAULT_PROFILE["autonomy"]
+    profile["horizon"] = str(first_scalar(profile.get("horizon"))) if str(first_scalar(profile.get("horizon"))) in HORIZONS else DEFAULT_PROFILE["horizon"]
+    profile["thesis"] = text_value(profile.get("thesis"), DEFAULT_PROFILE["thesis"], 1800) or DEFAULT_PROFILE["thesis"]
+    profile["website"] = normalize_url(text_value(profile.get("website"), "", 240))
+    profile["humans"] = number_value(profile.get("humans"), DEFAULT_PROFILE["humans"], 2, 120)
+    profile["agentCount"] = number_value(profile.get("agentCount"), DEFAULT_PROFILE["agentCount"], 4, 250)
+    profile["riskTolerance"] = number_value(profile.get("riskTolerance"), DEFAULT_PROFILE["riskTolerance"], 10, 90)
     return profile
 
 
@@ -800,9 +835,22 @@ def parse_json_object(text: str) -> dict:
         return json.loads(match.group(0))
 
 
+def gemini_model_candidates() -> list[str]:
+    candidates = [gemini_model(), "gemini-2.5-flash", "gemini-2.0-flash"]
+    ordered = []
+    for model in candidates:
+        if model and model not in ordered:
+            ordered.append(model)
+    return ordered
+
+
+def retryable_gemini_error(message: str) -> bool:
+    lowered = message.lower()
+    return "http 503" in lowered or "unavailable" in lowered or "high demand" in lowered
+
+
 def run_gemini_generate_content(profile: dict, sources: list[dict], tool_calls: list[dict]) -> tuple[dict, list[dict]]:
     gemini_key = config_value("GEMINI_API_KEY")
-    model = gemini_model()
     if not is_configured(gemini_key):
         raise IntegrationMissing("GEMINI_API_KEY is required for real agent generation.")
     payload = {
@@ -825,22 +873,35 @@ def run_gemini_generate_content(profile: dict, sources: list[dict], tool_calls: 
             "temperature": 0.35,
         },
     }
-    model_path = quote(model, safe="")
-    data = http_json(
-        "POST",
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model_path}:generateContent",
-        payload,
-        {"x-goog-api-key": gemini_key},
-        timeout=90,
-    )
-    text = extract_gemini_text(data)
-    event = tool_event(
-        "gemini.generateContent",
-        "completed",
-        {"model": model, "sourceCount": len(sources)},
-        {"candidates": len(data.get("candidates", []) or []), "characters": len(text)},
-    )
-    return parse_json_object(text), [event]
+    events = []
+    errors = []
+    for model in gemini_model_candidates():
+        model_path = quote(model, safe="")
+        try:
+            data = http_json(
+                "POST",
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model_path}:generateContent",
+                payload,
+                {"x-goog-api-key": gemini_key},
+                timeout=90,
+            )
+            text = extract_gemini_text(data)
+            event = tool_event(
+                "gemini.generateContent",
+                "completed",
+                {"model": model, "sourceCount": len(sources)},
+                {"candidates": len(data.get("candidates", []) or []), "characters": len(text)},
+            )
+            generated = parse_json_object(text)
+            generated["_modelUsed"] = model
+            return generated, [*events, event]
+        except ExternalServiceError as exc:
+            message = str(exc)
+            errors.append(message)
+            events.append(tool_event("gemini.generateContent", "failed", {"model": model}, {"error": compact_text(message, 500)}))
+            if not retryable_gemini_error(message):
+                raise
+    raise ExternalServiceError("Gemini generation failed after model retries: " + " | ".join(errors))
 
 
 def run_model_generation(profile: dict, sources: list[dict], tool_calls: list[dict]) -> tuple[dict, list[dict]]:
@@ -893,20 +954,20 @@ def coerce_agent_output(profile: dict, generated: dict, sources: list[dict], too
 
     return {
         **base,
-        "readiness": int(clamp(float(generated.get("readiness", base["readiness"])), 1, 100)),
-        "risk": generated.get("risk") if generated.get("risk") in {"Managed", "Medium", "High"} else base["risk"],
-        "leverage": compact_text(generated.get("leverage") or base["leverage"], 40),
+        "readiness": number_value(generated.get("readiness"), base["readiness"], 1, 100),
+        "risk": first_scalar(generated.get("risk")) if first_scalar(generated.get("risk")) in {"Managed", "Medium", "High"} else base["risk"],
+        "leverage": text_value(generated.get("leverage"), base["leverage"], 40),
         "roles": [compact_text(role, 120) for role in roles[:8]],
-        "pressure": compact_text(generated.get("pressure") or base["pressure"], 500),
-        "deployment": compact_text(generated.get("deployment") or base["deployment"], 180),
-        "approvalGates": int(clamp(float(generated.get("approvalGates", base["approvalGates"])), 1, 20)),
-        "controlChecks": int(clamp(float(generated.get("controlChecks", base["controlChecks"])), 1, 80)),
+        "pressure": text_value(generated.get("pressure"), base["pressure"], 500),
+        "deployment": text_value(generated.get("deployment"), base["deployment"], 180),
+        "approvalGates": number_value(generated.get("approvalGates"), base["approvalGates"], 1, 20),
+        "controlChecks": number_value(generated.get("controlChecks"), base["controlChecks"], 1, 80),
         "artifacts": artifacts,
         "approvals": approvals[:8],
         "sources": sources,
         "toolCalls": tool_calls,
         "integrations": integration_status(),
-        "strategicSummary": compact_text(generated.get("strategicSummary") or "", 800),
+        "strategicSummary": text_value(generated.get("strategicSummary"), "", 800),
     }
 
 
@@ -978,7 +1039,7 @@ def build_real_agent_run(profile: dict) -> dict:
             "createdAt": created_at,
             "status": "completed",
             "mode": "real-agent",
-            "model": gemini_model(),
+            "model": generated.get("_modelUsed", gemini_model()),
             "provider": "gemini",
             "horizonLabel": HORIZONS[profile["horizon"]],
         }
@@ -1060,9 +1121,18 @@ def supabase_key() -> str:
     return config_value("SUPABASE_SECRET_KEY")
 
 
+def supabase_base_url() -> str:
+    url = config_value("SUPABASE_URL").strip().rstrip("/")
+    for suffix in ("/rest/v1", "/rest/v1/"):
+        if url.endswith(suffix.rstrip("/")):
+            url = url[: -len(suffix.rstrip("/"))]
+            break
+    return url.rstrip("/")
+
+
 def supabase_enabled() -> bool:
     return bool(
-        config_value("SUPABASE_URL")
+        supabase_base_url()
         and config_value("SUPABASE_SECRET_KEY")
         and config_value("SUPABASE_PUBLISHABLE_KEY")
     )
@@ -1072,17 +1142,25 @@ def supabase_insert(table: str, row: dict) -> None:
     key = supabase_key()
     if not supabase_enabled():
         raise IntegrationMissing("Supabase URL, secret key, and publishable key are required for company-grade sync.")
-    http_json(
-        "POST",
-        f"{config_value('SUPABASE_URL').rstrip('/')}/rest/v1/{table}",
-        row,
-        {
-            "apikey": key,
-            "Authorization": f"Bearer {key}",
-            "Prefer": "return=minimal",
-        },
-        timeout=25,
-    )
+    try:
+        http_json(
+            "POST",
+            f"{supabase_base_url()}/rest/v1/{table}",
+            row,
+            {
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Prefer": "return=minimal",
+            },
+            timeout=25,
+        )
+    except ExternalServiceError as exc:
+        message = str(exc)
+        if "PGRST205" in message or "PGRST125" in message or "Could not find the table" in message:
+            raise ExternalServiceError(
+                "Supabase schema is missing. Open Supabase SQL Editor and run `supabase/schema.sql`, then restart CivAgent."
+            ) from exc
+        raise
 
 
 def sync_supabase_agent_run(result: dict, workspace_id: str) -> dict:

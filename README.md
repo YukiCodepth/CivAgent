@@ -6,7 +6,7 @@
 
 ### Company-grade organization intelligence software for deploying AI agents into real operations.
 
-[![Release](https://img.shields.io/badge/release-v1.0.2-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.2)
+[![Release](https://img.shields.io/badge/release-v1.0.3-72e0c4?style=for-the-badge)](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.3)
 [![Desktop](https://img.shields.io/badge/app-Electron%20Desktop-ffb454?style=for-the-badge)](#-download)
 [![Model](https://img.shields.io/badge/model-Gemini-ddeed3?style=for-the-badge)](#-required-stack)
 [![Sync](https://img.shields.io/badge/sync-Supabase%20Required-111111?style=for-the-badge)](#-required-stack)
@@ -21,14 +21,14 @@
 
 ## ⚡ Download
 
-Install CivAgent Desktop from the public [`v1.0.2` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.2).
+Install CivAgent Desktop from the public [`v1.0.3` release](https://github.com/YukiCodepth/CivAgent/releases/tag/v1.0.3).
 
 | Platform | Download |
 | --- | --- |
-| macOS | [`CivAgent-Desktop-1.0.2-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-mac-arm64.dmg) |
-| macOS ZIP | [`CivAgent-Desktop-1.0.2-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-mac-arm64.zip) |
-| Windows | [`CivAgent-Desktop-1.0.2-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-win-x64.exe) |
-| Linux | [`CivAgent-Desktop-1.0.2-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.2/CivAgent-Desktop-1.0.2-linux-x86_64.AppImage) |
+| macOS | [`CivAgent-Desktop-1.0.3-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.3/CivAgent-Desktop-1.0.3-mac-arm64.dmg) |
+| macOS ZIP | [`CivAgent-Desktop-1.0.3-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.3/CivAgent-Desktop-1.0.3-mac-arm64.zip) |
+| Windows | [`CivAgent-Desktop-1.0.3-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.3/CivAgent-Desktop-1.0.3-win-x64.exe) |
+| Linux | [`CivAgent-Desktop-1.0.3-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.3/CivAgent-Desktop-1.0.3-linux-x86_64.AppImage) |
 
 > macOS builds are unsigned until Apple Developer signing credentials are added, so macOS may show a first-open security warning.
 
@@ -99,6 +99,8 @@ SUPABASE_SECRET_KEY=...
 ```
 
 For development, keep `.env` in the repository root. For the packaged desktop app, use the app data `.env` path shown inside the workspace readiness panel, for example `~/Library/Application Support/civagent/.env` on macOS.
+
+Before the first real run, open Supabase SQL Editor and run [supabase/schema.sql](supabase/schema.sql). CivAgent will not mark a run complete until those tables exist and Supabase sync succeeds.
 
 ## 🛠️ Quick Start
 
