@@ -88,7 +88,7 @@ jobs:
             ## Assets
             - macOS: `CivAgent-Desktop-1.0.0-mac-arm64.dmg` and `CivAgent-Desktop-1.0.0-mac-arm64.zip`
             - Windows: `CivAgent-Desktop-1.0.0-win-x64.exe`
-            - Linux: `CivAgent-Desktop-1.0.0-linux-x64.AppImage`
+            - Linux: `CivAgent-Desktop-1.0.0-linux-x86_64.AppImage`
 
             ## Runtime
             CivAgent Desktop starts a local Python backend, opens the `/app` workspace, requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B, then syncs completed run evidence to Supabase.

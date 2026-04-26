@@ -28,7 +28,7 @@ The public desktop installers are published from the [`v1.0.0` GitHub Release](h
 | macOS | [`CivAgent-Desktop-1.0.0-mac-arm64.dmg`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.dmg) |
 | macOS ZIP | [`CivAgent-Desktop-1.0.0-mac-arm64.zip`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-mac-arm64.zip) |
 | Windows | [`CivAgent-Desktop-1.0.0-win-x64.exe`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-win-x64.exe) |
-| Linux | [`CivAgent-Desktop-1.0.0-linux-x64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-linux-x64.AppImage) |
+| Linux | [`CivAgent-Desktop-1.0.0-linux-x86_64.AppImage`](https://github.com/YukiCodepth/CivAgent/releases/download/v1.0.0/CivAgent-Desktop-1.0.0-linux-x86_64.AppImage) |
 
 The app starts a local backend, opens the `/app` workspace, stores integration settings locally with masked readiness, and requires Gemini, Tavily, Supabase, Firecrawl, Composio, and E2B before a real run can complete.
 
